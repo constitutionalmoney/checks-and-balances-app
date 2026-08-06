@@ -1,0 +1,94 @@
+name: Bug report
+about: Report a reproducible defect using synthetic or redacted data.
+title: "[BUG] "
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not report security vulnerabilities, participant data, identity documents, exact addresses, wallet secrets, RPC credentials, or exploitable abuse details here.** Read `SECURITY.md` first. Use synthetic or redacted evidence only.
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Local development
+        - CI
+        - VRSCTEST testnet
+        - Documentation or website
+        - Other non-production environment
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit, release, application version, and relevant pinned client versions
+      placeholder: commit SHA; Verus Mobile/daemon/library version if applicable
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Participant PWA
+        - Committee console
+        - Public verifier
+        - API
+        - Worker or scheduler
+        - Verus Mobile request flow
+        - Verus RPC or provenance
+        - Directory or auth.md
+        - Documentation or website status
+        - CI/CD or deployment
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction using synthetic data
+      description: Include the minimum steps and synthetic identifiers. Remove secrets and personal data.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs, screenshots, or traces
+      description: Do not include tokens, wallet payloads, identity documents, faces, contact values, exact addresses, evidence, private notes, RPC credentials, or private keys.
+      render: shell
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and affected protocol state
+      description: Does this affect issuance, expiry, revocation, appeal, authorization, privacy, VRSCTEST writes, public status, or only presentation?
+    validations:
+      required: true
+  - type: textarea
+    id: regression
+    attributes:
+      label: Last known working version or related issue
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: This report contains synthetic or properly redacted data only.
+          required: true
+        - label: This is not a security vulnerability or private disclosure.
+          required: true
+        - label: I did not test against mainnet or real participants without written authorization.
+          required: true
