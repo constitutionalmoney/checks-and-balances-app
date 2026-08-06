@@ -1,0 +1,107 @@
+name: Protocol or policy RFC
+about: Propose or resolve a protocol rule that code must not decide silently.
+title: "[P1][RFC] "
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for committee, evidence, locality, uniqueness, renewal, quorum/signing, appeal, recovery, public-status, Verus/on-chain, relying-party, and mainnet decisions. An RFC may conclude that a capability should not be implemented.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and exact decision required
+      description: Separate the current public commitment, proposal, and unresolved question.
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current status and source
+      description: Cite the protocol-status matrix, current website page, PRD, guide, or prior issue. State what remains disabled.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed rule and claim semantics
+      description: Define precisely what the protocol would and would not claim, who it affects, and its lifecycle/versioning.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives, including not implementing the capability
+      description: Explain benefits, costs, failure modes, and reasons for selection/rejection.
+    validations:
+      required: true
+  - type: textarea
+    id: actors
+    attributes:
+      label: Actors, authority, conflicts, and due process
+      description: Define who may act/decide/sign/review/appeal/recover/revoke and how capture or conflict is prevented.
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy, data, retention, and disclosure impact
+      description: Identify exact fields, purpose, access, retention, public/on-chain permanence, relying-party exposure, and less-invasive alternatives.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security, abuse, collusion, and failure analysis
+      description: Include adversaries, replay, substitution, enumeration, capture, outage, recovery, and fail-open risks as applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: inclusion
+    attributes:
+      label: Accessibility, safety, and exclusion analysis
+      description: Address people without smartphones/documents, disability, protected addresses, vulnerable groups, rural/remote access, and appeal.
+    validations:
+      required: true
+  - type: textarea
+    id: verus
+    attributes:
+      label: Verus, wallet, chain, and compatibility impact
+      description: State VRSCTEST use, exact identities/VDXF objects, custody, confirmation/readback/reorg, mobile support, and whether mainnet is unnecessary.
+    validations:
+      required: true
+  - type: textarea
+    id: migration
+    attributes:
+      label: Versioning, migration, rollback, and incident response
+      description: Explain how existing records/credentials/policies are affected and how the capability can be disabled or superseded.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Test and review evidence required before approval
+      placeholder: Synthetic adversarial tests, device compatibility, privacy/legal/security/accessibility review, operational rehearsal...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Approval and acceptance criteria
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: restraint
+    attributes:
+      label: RFC restraint
+      options:
+        - label: Code and public copy will keep this capability disabled/unapproved until the RFC is accepted and release gates pass.
+          required: true
+        - label: The proposal does not use raw evidence, exact addresses, wallet secrets, or public participant lists by default.
+          required: true
+        - label: The proposal does not treat blockchain publication as a substitute for governance, privacy, or due process.
+          required: true
