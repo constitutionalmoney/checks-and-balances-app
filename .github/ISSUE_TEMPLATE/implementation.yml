@@ -1,0 +1,98 @@
+name: Implementation work
+about: Propose a scoped implementation task tied to the PRD and roadmap.
+title: "[P?][AREA] "
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read `README.md`, `docs/PROTOCOL_STATUS.md`, `docs/PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `CODEX.md`, and the relevant dependency issues before proposing work. Planned or unfinished behaviour must remain disabled.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: State the user, operator, developer, or protocol outcome—not merely the files to edit.
+      placeholder: A participant can...
+    validations:
+      required: true
+  - type: input
+    id: prd
+    attributes:
+      label: PRD requirements and work package
+      placeholder: FR-..., WP-..., phase ...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and approved protocol rules
+      description: Link prerequisite issues/RFCs and identify any unfinished rule that must stay disabled.
+      placeholder: "Depends on #...; uses policy ...; feature remains off until #..."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and deliverables
+      placeholder: Describe the smallest coherent vertical slice.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Include positive and negative behaviour, failure recovery, documentation, and test evidence.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and data impact
+      description: Identify fields collected/stored/disclosed/logged/queued/exported/on-chain, purpose, access, retention, and forbidden data.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and abuse analysis
+      description: Address authorization, replay, idempotency, state-machine bypass, enumeration, wrong chain, dependency outage, and log/secret risks as applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility and exclusion impact
+      description: Include WCAG, non-QR/non-smartphone paths, physical-process implications, and exclusion risks where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests and evidence
+      placeholder: Unit, integration, E2E, device, VRSCTEST, migration, load, accessibility...
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: State what this issue must not decide or implement.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundary confirmation
+      options:
+        - label: This issue does not introduce identity-document/photo upload or raw evidence storage unless an approved policy issue expressly requires it.
+          required: true
+        - label: This issue does not expose authenticated `verusd` RPC or enable mainnet.
+          required: true
+        - label: This issue does not imply that VerusID control proves human presence, uniqueness, legal residence, eligibility, or political intent.
+          required: true
+        - label: This issue will keep unfinished protocol choices disabled and accurately labelled.
+          required: true
