@@ -1,0 +1,2 @@
+export const RUNTIME_CONFIG = Symbol("RUNTIME_CONFIG");
+export const DEPENDENCY_CHECKER = Symbol("DEPENDENCY_CHECKER");

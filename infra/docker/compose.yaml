@@ -1,0 +1,180 @@
+name: checks-and-balances-local
+
+x-app-environment: &app-environment
+  CBC_ENVIRONMENT: local
+  CBC_PROTOCOL_STAGE: specification
+  CBC_RELEASE_STATUS: not_operational
+  CBC_VERUS_NETWORK: FAKE
+  CBC_VERUS_RPC_URL: http://fake-verus-rpc:8080
+  DATABASE_URL: postgresql://cbc:cbc_local_only@postgres:5432/cbc
+  REDIS_URL: redis://redis:6379
+  CBC_PARTICIPANT_SESSION_AUDIENCE: cbc-participant-app
+  CBC_COMMITTEE_SESSION_AUDIENCE: cbc-committee-console
+  CBC_MAINNET_WRITES_ENABLED: "false"
+  CBC_DOCUMENT_UPLOAD_ENABLED: "false"
+
+x-runtime-dependencies: &runtime-dependencies
+  postgres:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
+  fake-verus-rpc:
+    condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18.1-bookworm
+    environment:
+      POSTGRES_DB: cbc
+      POSTGRES_USER: cbc
+      POSTGRES_PASSWORD: cbc_local_only
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cbc -d cbc"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [private]
+
+  redis:
+    image: redis:8.2.3-bookworm
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [private]
+
+  mailpit:
+    image: axllent/mailpit:v1.30.6
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [private]
+
+  fake-verus-rpc:
+    image: wiremock/wiremock:3.13.2
+    command: ["--global-response-templating", "--disable-gzip", "--verbose"]
+    volumes:
+      - ./fake-verus-rpc:/home/wiremock:ro
+    ports:
+      - "127.0.0.1:18080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/__admin/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [verus-private]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: api
+    environment:
+      <<: *app-environment
+      CBC_SERVICE_PORT: 4000
+    depends_on: *runtime-dependencies
+    ports:
+      - "127.0.0.1:4000:4000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 10s
+      timeout: 4s
+      retries: 20
+    networks: [public, private, verus-private]
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: worker
+    environment:
+      <<: *app-environment
+      CBC_SERVICE_PORT: 4010
+    depends_on: *runtime-dependencies
+    ports:
+      - "127.0.0.1:4010:4010"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4010/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 10s
+      timeout: 4s
+      retries: 20
+    networks: [private, verus-private]
+
+  participant:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: participant
+    environment:
+      PORT: 3000
+    ports: ["127.0.0.1:3100:3000"]
+    networks: [public]
+
+  committee:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: committee
+    environment:
+      PORT: 3001
+    ports: ["127.0.0.1:3101:3001"]
+    networks: [public]
+
+  verify:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: verify
+    environment:
+      PORT: 3002
+    ports: ["127.0.0.1:3102:3002"]
+    networks: [public]
+
+  docs:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: docs
+    environment:
+      PORT: 3003
+    ports: ["127.0.0.1:3103:3003"]
+    networks: [public]
+
+volumes:
+  postgres-data:
+
+networks:
+  public:
+  private:
+  verus-private:

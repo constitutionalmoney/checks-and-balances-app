@@ -1,0 +1,31 @@
+{
+  "name": "@cbc/ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared accessible non-operational application shell",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "dist",
+    "src/styles.css"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cbc/contracts": "workspace:*",
+    "react": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18"
+  }
+}

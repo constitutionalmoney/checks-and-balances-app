@@ -1,14 +1,20 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 venv/
 .env
 .env.local
+.env.*
+!.env.example
 
 # Build artifacts
 dist/
 build/
 .next/
+.turbo/
+coverage/
 *.tsbuildinfo
+packages/db/src/generated/
 
 # Secrets
 *.pem
@@ -34,6 +40,7 @@ data/
 db/
 *.sqlite
 *.sqlite3
+infra/docker/.data/
 
 # Temporary
 tmp/

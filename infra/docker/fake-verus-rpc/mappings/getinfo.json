@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.method == 'getinfo')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "jsonrpc": "2.0",
+      "id": "cbc-readiness",
+      "result": {
+        "chain": "VRSCTEST",
+        "blocks": 1,
+        "synthetic": true
+      }
+    }
+  }
+}

@@ -5,6 +5,10 @@
 
 /docs/ @constitutionalmoney
 /schemas/ @constitutionalmoney
+/apps/ @constitutionalmoney
+/packages/ @constitutionalmoney
+/infra/ @constitutionalmoney
+/scripts/ @constitutionalmoney
 /.github/ @constitutionalmoney
 /SECURITY.md @constitutionalmoney
 /GOVERNANCE.md @constitutionalmoney

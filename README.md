@@ -67,16 +67,16 @@ Any additional claim must have its own method, evidence rules, label, policy ver
 
 ## Planned application surfaces
 
-| Surface | Purpose | Recommended host |
-|---|---|---|
-| Public website | Explain the protocol, current status, safeguards, and roadmap | `checksandbalances.services` |
-| Participant PWA | Account, optional VerusID link, session request, status, renewal, appeal, consent | `app.checksandbalances.services` |
-| Committee console | Formation, rosters, sessions, decisions, cycles, appeals, audit | `committee.checksandbalances.services` |
-| Public verifier | Human-readable status and proof checking without participant enumeration | `verify.checksandbalances.services` |
-| Versioned API | Participant, committee, discovery, status, and relying-party APIs | `api.checksandbalances.services` |
-| Developer documentation | OpenAPI, schemas, SDKs, integration guides, protocol status | `docs.checksandbalances.services` |
-| Service health | Public uptime and incident status | `status.checksandbalances.services` |
-| Committee discovery | Approved public committee directory, pages, and `auth.md` | `committees.checksandbalances.services/{slug}` |
+| Surface                 | Purpose                                                                           | Recommended host                               |
+| ----------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Public website          | Explain the protocol, current status, safeguards, and roadmap                     | `checksandbalances.services`                   |
+| Participant PWA         | Account, optional VerusID link, session request, status, renewal, appeal, consent | `app.checksandbalances.services`               |
+| Committee console       | Formation, rosters, sessions, decisions, cycles, appeals, audit                   | `committee.checksandbalances.services`         |
+| Public verifier         | Human-readable status and proof checking without participant enumeration          | `verify.checksandbalances.services`            |
+| Versioned API           | Participant, committee, discovery, status, and relying-party APIs                 | `api.checksandbalances.services`               |
+| Developer documentation | OpenAPI, schemas, SDKs, integration guides, protocol status                       | `docs.checksandbalances.services`              |
+| Service health          | Public uptime and incident status                                                 | `status.checksandbalances.services`            |
+| Committee discovery     | Approved public committee directory, pages, and `auth.md`                         | `committees.checksandbalances.services/{slug}` |
 
 An optional later deployment may use `{slug}.committees.checksandbalances.services` after wildcard-host tenancy, certificates, and governance are designed. See [docs/SUBDOMAINS.md](./docs/SUBDOMAINS.md) for the deployment and DNS plan.
 
@@ -124,7 +124,7 @@ The baseline service will use a private canonical database plus privacy-safe com
 
 See [docs/VERUS_MOBILE_INTEGRATION.md](./docs/VERUS_MOBILE_INTEGRATION.md).
 
-## Planned repository structure
+## Repository structure
 
 ```text
 apps/
@@ -135,15 +135,15 @@ apps/
   worker/            Verus, notifications, expiry, cycle, and outbox jobs
   docs/              Developer documentation site
 packages/
-  domain/             State machines, policies, and authorization rules
-  db/                 PostgreSQL schema and migrations
-  auth/               Passkey, email, session, and VerusID linking
-  verus/              Wallet requests, RPC adapter, VDXF, fixtures, readback
-  contracts/          OpenAPI, JSON Schema, API clients
-  ui/                 Shared accessible components
-  config/             Typed environment configuration
-  observability/      Logs, metrics, traces, redaction
-  testkit/            Synthetic fixtures, fake clocks, and fake RPC/wallet tools
+  domain/             Reserved domain boundary; no business logic in WP-01
+  db/                 Model-free Prisma foundation and readiness checks
+  auth/               Distinct session-audience boundary only
+  verus/              Readiness-only fake/private RPC boundary; no writes
+  contracts/          Health/status OpenAPI and shared release status
+  ui/                 Shared accessible shell and status banner
+  config/             Typed fail-closed environment configuration
+  observability/      Structured redacted logging
+  testkit/            Synthetic-only fixture boundary
 schemas/
   cbc-human-attestation.schema.json
   cbc-public-status.schema.json
@@ -165,7 +165,27 @@ infra/
   monitoring/
 ```
 
-The application code has not yet been scaffolded. The structure above is the approved target, not a claim that the files or services already exist.
+The WP-01 application foundation is scaffolded. Every app is an empty shell labelled
+**Specification / VRSCTEST / Not operational**. The API exposes only health, readiness, generated
+OpenAPI, and protocol-status routes; the worker registers no protocol jobs. Protocol business
+logic, accounts, sessions, participant collection, committee operations, document uploads, wallet
+flows, Verus writes, and mainnet support remain absent.
+
+## Development
+
+The workspace pins Node.js `24.19.0` and pnpm `11.20.0`. See
+[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) for the clean-clone workflow, every root quality
+command, environment profiles, local URLs, and Docker Compose instructions.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm check
+pnpm local:up
+```
+
+The local stack uses synthetic-only PostgreSQL/Redis dependencies, Mailpit, and a fake private
+Verus `getinfo` endpoint. It creates no object-storage bucket and requires no wallet, private key,
+live RPC credential, production secret, or participant record.
 
 ## Source-of-truth documents
 
