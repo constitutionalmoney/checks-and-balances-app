@@ -17,7 +17,7 @@
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc -p tsconfig.tools.json --noEmit && turbo run typecheck",
+    "typecheck": "turbo run typecheck && tsc -p tsconfig.tools.json --noEmit",
     "test": "turbo run test",
     "test:unit": "turbo run test",
     "test:integration": "vitest run --config vitest.integration.config.ts",

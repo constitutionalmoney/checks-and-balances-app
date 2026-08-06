@@ -14,6 +14,6 @@ RUN pnpm install --frozen-lockfile
 
 ARG CBC_APP
 ENV CBC_APP=${CBC_APP}
-RUN pnpm --filter "@cbc/${CBC_APP}" build
+RUN pnpm --filter "@cbc/${CBC_APP}..." build
 
 CMD ["sh", "-c", "pnpm --filter @cbc/${CBC_APP} start"]
