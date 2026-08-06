@@ -18,9 +18,19 @@ This document is the repository’s public truth table for what is **fixed**, **
 | `proposed` | A concrete design exists but has not been approved as protocol. |
 | `unfinished` | The question is publicly acknowledged but the rule is not resolved. |
 | `planned` | Product or technical capability is on the roadmap and not live. |
+| `planned_optional` | Optional roadmap capability that is not required for the baseline protocol and remains disabled by default. |
+| `planned_review_required` | Planned document or capability that requires external or jurisdiction-specific review before use. |
+| `recommended` | Recommended application implementation choice rather than a protocol claim. |
+| `recommended_architecture` | Recommended technical architecture rather than an operational capability or immutable protocol rule. |
 | `testnet_only` | Implemented or tested only on VRSCTEST; it conveys no production assurance. |
 | `pilot_approved` | Expressly approved for a limited, published pilot. |
 | `operational` | Deployed and supported for the stated environment and scope. |
+| `limited` | Permitted only within a narrowly defined assistance or operational boundary. |
+| `not_required` | The baseline protocol does not require the capability or disclosure. |
+| `not_approved` | The proposal exists or existed but has not been approved and must not be implemented as authoritative. |
+| `out_of_scope` | The baseline protocol does not make or determine this claim. |
+| `prohibited` | The capability or data use is forbidden under the current protocol posture. |
+| `prohibited_pending_decision` | Forbidden unless a separate future decision expressly approves a narrowly defined use. |
 | `deprecated` | Retained for historical compatibility but not valid for new use. |
 | `archived` | Historical context that does not control the current protocol. |
 
@@ -34,7 +44,7 @@ This document is the repository’s public truth table for what is **fixed**, **
 | In-person review | `public_commitment` | Verification includes face-to-face human review. | Required state transition before approval. |
 | Forty-five-day expiry | `public_commitment` | Every attestation expires after 45 days. | Enforce in domain and status service; no UI-only expiry. |
 | Renewal | `public_commitment` + `unfinished` | Current status must be renewed; random peer mechanics remain unfinished. | Implement framework and feature flags; do not hard-code selection rules before RFC approval. |
-| Twelve-person committee | `public_commitment` + `proposed_specification` | Public story uses twelve neighbors/local members; formation rule needs formal scope and exceptions. | Model minimum member policy as a versioned parameter; default test fixture may use 12. |
+| Twelve-person committee | `public_commitment` + `proposed` | Public story uses twelve neighbours/local members; formation rule needs formal scope and exceptions. | Model minimum member policy as a versioned parameter; default test fixture may use 12. |
 | Two-of-three signing | `proposed` | Older issues proposed two-of-three without defining which three, for which action, or how selected. | No production constant; blocked on signing/quorum RFC. |
 | Committee-member qualifications | `unfinished` | Current protocol pages do not support older requirements such as shareholder status or owning a silver coin. | Exclude those requirements unless a later approved policy adopts them. |
 | Human-presence claim | `public_commitment` | A real person appeared and completed the approved process. | Baseline attestation claim. |
