@@ -76,18 +76,18 @@ Any additional claim must have its own method, evidence rules, label, policy ver
 | Versioned API | Participant, committee, discovery, status, and relying-party APIs | `api.checksandbalances.services` |
 | Developer documentation | OpenAPI, schemas, SDKs, integration guides, protocol status | `docs.checksandbalances.services` |
 | Service health | Public uptime and incident status | `status.checksandbalances.services` |
-| Committee discovery | Optional committee-specific public pages and `auth.md` | `{slug}.committees.checksandbalances.services` |
+| Committee discovery | Approved public committee directory, pages, and `auth.md` | `committees.checksandbalances.services/{slug}` |
 
-See [docs/SUBDOMAINS.md](./docs/SUBDOMAINS.md) for the deployment and DNS plan.
+An optional later deployment may use `{slug}.committees.checksandbalances.services` after wildcard-host tenancy, certificates, and governance are designed. See [docs/SUBDOMAINS.md](./docs/SUBDOMAINS.md) for the deployment and DNS plan.
 
 ## Human-verification lifecycle
 
 ```text
 requested -> scheduled -> checked_in -> under_review
 under_review -> approved | rejected | needs_more_information | withdrawn
-approved -> issued -> active
+approved -> issuance_pending -> issued -> active
 active -> expired | revoked | superseded
-rejected -> appealed -> appeal_upheld | appeal_denied
+rejected -> appealed -> appeal_upheld | appeal_denied | appeal_remanded
 ```
 
 No route may skip directly from `requested` to `active`.
@@ -133,6 +133,7 @@ apps/
   verify/            Public status and proof verifier
   api/               Versioned HTTP API
   worker/            Verus, notifications, expiry, cycle, and outbox jobs
+  docs/              Developer documentation site
 packages/
   domain/             State machines, policies, and authorization rules
   db/                 PostgreSQL schema and migrations
@@ -142,8 +143,10 @@ packages/
   ui/                 Shared accessible components
   config/             Typed environment configuration
   observability/      Logs, metrics, traces, redaction
+  testkit/            Synthetic fixtures, fake clocks, and fake RPC/wallet tools
 schemas/
   cbc-human-attestation.schema.json
+  cbc-public-status.schema.json
   auth.md
 docs/
   PRD.md
@@ -154,6 +157,8 @@ docs/
   PROTOCOL_STATUS.md
   PRIVACY_AND_DATA.md
   THREAT_MODEL.md
+  SOURCE_ALIGNMENT.md
+  ISSUE_ROADMAP.md
 infra/
   docker/
   deployment/
@@ -172,6 +177,8 @@ The application code has not yet been scaffolded. The structure above is the app
 - [Protocol status matrix](./docs/PROTOCOL_STATUS.md)
 - [Privacy and data requirements](./docs/PRIVACY_AND_DATA.md)
 - [Threat model](./docs/THREAT_MODEL.md)
+- [Website and development-guide alignment](./docs/SOURCE_ALIGNMENT.md)
+- [Issue-by-issue development roadmap](./docs/ISSUE_ROADMAP.md)
 - [Codex execution instructions](./CODEX.md)
 
 ## Website alignment
@@ -190,6 +197,8 @@ The application must remain aligned with the current public pages:
 - [Privacy and data](https://checksandbalances.services/privacy-and-data/)
 - [Historical archive](https://checksandbalances.services/archive/)
 
+The page-by-page requirement mapping is in [docs/SOURCE_ALIGNMENT.md](./docs/SOURCE_ALIGNMENT.md).
+
 ## Build phases
 
 0. Repository, licensing, environments, and CI foundation.
@@ -199,6 +208,7 @@ The application must remain aligned with the current public pages:
 4. Reproducible 45-day cycle selection, notifications, and aggregate reporting.
 5. Privacy-minimized status API, developer interfaces, and disabled-by-default RMR adapter.
 6. Legal, privacy, security, accessibility, backup, incident, and pilot-readiness gates.
+7. Separate mainnet necessity decision, with mainnet remaining blocked by default.
 
 No public pilot or mainnet write is permitted merely because code exists.
 
@@ -206,7 +216,8 @@ No public pilot or mainnet write is permitted merely because code exists.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md), [GOVERNANCE.md](./GOVERNANCE.md), [SECURITY.md](./SECURITY.md), and the [Developer Certificate of Origin](./DCO.txt) before contributing.
 
-- Open an issue before substantial implementation.
+- Start implementation with [issue #15](https://github.com/constitutionalmoney/checks-and-balances-app/issues/15), then follow [docs/ISSUE_ROADMAP.md](./docs/ISSUE_ROADMAP.md).
+- Open or select an issue before substantial implementation.
 - Keep pull requests narrow and tied to an acceptance checklist.
 - Sign every commit with `Signed-off-by: Name <email>`.
 - Do not submit private evidence, personal information, credentials, private keys, or security vulnerabilities in public issues or pull requests.
