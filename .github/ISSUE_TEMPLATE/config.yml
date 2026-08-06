@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerabilities
+    url: https://github.com/constitutionalmoney/checks-and-balances-app/security/policy
+    about: Read the security policy. Do not publish vulnerabilities, secrets, participant data, or exploitable abuse details in a public issue.
+  - name: Current protocol website
+    url: https://checksandbalances.services/
+    about: Review the current Checks & Balances Protocol status before filing product or documentation issues.
