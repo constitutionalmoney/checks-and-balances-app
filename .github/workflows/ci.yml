@@ -65,6 +65,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  local-stack:
+    name: Build and smoke-test local stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Start every local service
+        run: docker compose -f infra/docker/compose.yaml up --detach --build --wait --wait-timeout 300
+      - name: Probe shells and readiness routes
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:4000/ready | grep --fixed-strings '"ready":true'
+          curl --fail --silent --show-error http://127.0.0.1:4000/api/v1/protocol/status | grep --fixed-strings '"operational":false'
+          curl --fail --silent --show-error http://127.0.0.1:4010/ready | grep --fixed-strings '"ready":true'
+          for port in 3100 3101 3102 3103; do
+            curl --fail --silent --show-error "http://127.0.0.1:${port}" | grep --fixed-strings 'Not operational'
+          done
+          curl --fail --silent --show-error http://127.0.0.1:8025/readyz
+          curl --fail --silent --show-error --header 'content-type: application/json' \
+            --data '{"jsonrpc":"2.0","id":"ci","method":"getinfo","params":[]}' \
+            http://127.0.0.1:18080 | grep --fixed-strings '"synthetic":true'
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose -f infra/docker/compose.yaml logs --no-color
+      - name: Stop local stack
+        if: always()
+        run: docker compose -f infra/docker/compose.yaml down --volumes
+
   container-scan:
     name: API container scan
     runs-on: ubuntu-latest
