@@ -1,0 +1,13 @@
+# Checks & Balances Protocol — initial ownership
+# Replace or expand these entries as maintainers and specialist reviewers are formally appointed.
+
+* @constitutionalmoney
+
+/docs/ @constitutionalmoney
+/schemas/ @constitutionalmoney
+/.github/ @constitutionalmoney
+/SECURITY.md @constitutionalmoney
+/GOVERNANCE.md @constitutionalmoney
+/LICENSE @constitutionalmoney
+/NOTICE @constitutionalmoney
+/TRADEMARKS.md @constitutionalmoney
