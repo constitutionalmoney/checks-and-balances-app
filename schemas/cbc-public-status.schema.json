@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.checksandbalances.services/schemas/cbc-public-status.v1.schema.json",
+  "title": "Checks & Balances Protocol Public Status Response v1",
+  "description": "Privacy-minimized status response for participant-presented or otherwise authorized relying-party checks. This schema does not permit raw evidence or numeric trust scores.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "environment",
+    "status",
+    "checkedAt",
+    "attestationType",
+    "assuranceLevel",
+    "issuer",
+    "validity",
+    "revocationState",
+    "policyVersions",
+    "opaqueReference"
+  ],
+  "properties": {
+    "schema": {
+      "const": "cbc.public-status.v1"
+    },
+    "environment": {
+      "const": "vrsctest"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "expired", "revoked", "unknown", "unavailable"]
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attestationType": {
+      "type": "string",
+      "const": "cbc.human.v1"
+    },
+    "assuranceLevel": {
+      "type": ["string", "null"],
+      "enum": ["test", "pilot", null]
+    },
+    "issuer": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["identityAddress", "recognitionStatus"],
+      "properties": {
+        "identityAddress": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 128
+        },
+        "recognitionStatus": {
+          "type": "string",
+          "enum": ["testnet", "pilot_approved", "suspended", "retired", "unknown"]
+        }
+      }
+    },
+    "jurisdictionScopes": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9.-]{1,127}$"
+      },
+      "description": "Approved broad scopes only; no exact address."
+    },
+    "claimLimitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "does_not_prove_legal_residence",
+          "does_not_prove_citizenship",
+          "does_not_prove_voting_eligibility",
+          "does_not_prove_uniqueness",
+          "does_not_prove_truth_or_consensus",
+          "does_not_express_political_intent"
+        ]
+      }
+    },
+    "validity": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["validFrom", "validUntil"],
+      "properties": {
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "revocationState": {
+      "type": "string",
+      "enum": ["not_revoked", "revoked", "unknown", "not_applicable"]
+    },
+    "policyVersions": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "evidence": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "privacy": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "appeal": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "opaqueReference": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 256,
+      "description": "High-entropy reference supplied through an approved participant-mediated or client-authorized flow."
+    },
+    "provenance": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "anchorReference": {
+          "type": ["string", "null"],
+          "maxLength": 256
+        },
+        "verificationState": {
+          "type": "string",
+          "enum": ["not_requested", "pending", "verified", "unavailable", "mismatch"]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["unknown", "unavailable"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "issuer": {
+            "type": ["null"]
+          },
+          "validity": {
+            "type": ["null"]
+          },
+          "policyVersions": {
+            "type": ["null"]
+          }
+        }
+      }
+    }
+  ]
+}
