@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.checksandbalances.services/schemas/cbc-human-attestation.v1.schema.json",
+  "title": "Checks & Balances Protocol Human Attestation Envelope v1",
+  "description": "Draft minimum attestation envelope. It does not contain raw evidence and does not by itself prove legal residence, citizenship, voting eligibility, uniqueness, truth, consensus, or political intent. Server-side domain rules must enforce a maximum 45-day validity window.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "attestationId",
+    "environment",
+    "subject",
+    "issuer",
+    "assurance",
+    "method",
+    "validity",
+    "privacy",
+    "status"
+  ],
+  "properties": {
+    "schema": {
+      "const": "cbc.attestation.human.v1"
+    },
+    "attestationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "environment": {
+      "const": "vrsctest"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subjectRef"],
+      "properties": {
+        "subjectRef": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 256,
+          "description": "Opaque non-enumerable subject reference; not a name, email, or address."
+        },
+        "verusIdentityAddress": {
+          "type": ["string", "null"],
+          "minLength": 20,
+          "maxLength": 128,
+          "description": "Optional participant-controlled VerusID i-address."
+        }
+      }
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["committeeIdentityAddress", "committeeRef"],
+      "properties": {
+        "committeeIdentityAddress": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 128
+        },
+        "committeeRef": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "recognitionStatus": {
+          "type": "string",
+          "enum": ["testnet", "pilot_approved", "suspended", "retired"]
+        }
+      }
+    },
+    "assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "humanPresence",
+        "evidenceMatch",
+        "uniquenessMethod",
+        "localityMethod",
+        "assuranceLevel"
+      ],
+      "properties": {
+        "humanPresence": {
+          "const": true
+        },
+        "evidenceMatch": {
+          "const": true,
+          "description": "The person matched the approved credential-photo or other approved evidence pathway under the referenced policy."
+        },
+        "uniquenessMethod": {
+          "type": "string",
+          "enum": ["not_assessed", "not_yet_operational"],
+          "description": "v1 does not claim one-person-one-credential."
+        },
+        "localityMethod": {
+          "type": "string",
+          "enum": ["not_assessed", "declared", "document_supported"],
+          "description": "A separately typed local-connection method; it is not automatically legal residence."
+        },
+        "assuranceLevel": {
+          "type": "string",
+          "enum": ["test", "pilot"]
+        }
+      }
+    },
+    "jurisdiction": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["scope", "precision", "legalResidenceClaim"],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{1,127}$",
+          "description": "Approved broad jurisdiction code, not an exact address."
+        },
+        "precision": {
+          "type": "string",
+          "enum": ["country", "province_state", "regional", "municipality", "community", "not_assessed"]
+        },
+        "legalResidenceClaim": {
+          "const": false
+        }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "protocolVersion",
+        "evidencePolicyVersion",
+        "privacyPolicyVersion",
+        "appealPolicyVersion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "const": "cbc.in_person.committee.v1"
+        },
+        "protocolVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "evidencePolicyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "privacyPolicyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "appealPolicyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "accessibilityPolicyVersion": {
+          "type": ["string", "null"],
+          "maxLength": 128
+        },
+        "signingPolicyVersion": {
+          "type": ["string", "null"],
+          "maxLength": 128
+        }
+      }
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuedAt", "validFrom", "expiresAt", "cycleId"],
+      "properties": {
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Must be no later than 45 days after the approved validity start; enforced by domain and database rules."
+        },
+        "cycleId": {
+          "type": ["string", "null"],
+          "maxLength": 256
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceOnChain",
+        "evidenceSharedWithRelyingParties",
+        "exactAddressOnChain",
+        "publicParticipantRegistry"
+      ],
+      "properties": {
+        "evidenceOnChain": {
+          "const": false
+        },
+        "evidenceSharedWithRelyingParties": {
+          "const": false
+        },
+        "exactAddressOnChain": {
+          "const": false
+        },
+        "publicParticipantRegistry": {
+          "const": false
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["issued", "active", "expired", "revoked", "superseded"]
+    },
+    "revocation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["not_revoked", "revoked"]
+        },
+        "effectiveAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "reasonCategory": {
+          "type": ["string", "null"],
+          "enum": [
+            null,
+            "participant_request",
+            "issued_in_error",
+            "fraud_or_misrepresentation",
+            "security_incident",
+            "issuer_compromise",
+            "policy_ineligibility",
+            "superseded"
+          ]
+        }
+      }
+    },
+    "opaqueAuditReference": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 256
+    },
+    "supersedes": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    }
+  }
+}
