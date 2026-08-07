@@ -1,0 +1,20 @@
+packages:
+  - apps/*
+  - packages/*
+
+allowBuilds:
+  "@prisma/engines": true
+  "@scarf/scarf": false
+  esbuild: true
+  msgpackr-extract: false
+  prisma: true
+  sharp: true
+
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  - tsx@4.23.9
+
+overrides:
+  find-my-way: 9.7.0
+  js-yaml: 5.2.2

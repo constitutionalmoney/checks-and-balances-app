@@ -1,0 +1,11 @@
+.git
+.github
+.next
+.turbo
+coverage
+dist
+node_modules
+infra/docker/.data
+*.log
+.env
+.env.*

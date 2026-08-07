@@ -1,0 +1,17 @@
+{
+  "name": "@cbc/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Non-operational protocol status and future API contract boundary",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "openapi"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

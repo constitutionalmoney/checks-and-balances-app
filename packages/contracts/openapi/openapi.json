@@ -1,0 +1,58 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Checks & Balances Protocol foundation API",
+    "version": "0.0.0",
+    "description": "Health and non-operational status shell only."
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": { "description": "API process is alive." }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "getReadiness",
+        "responses": {
+          "200": { "description": "Dependencies are ready." },
+          "503": { "description": "A dependency is unavailable." }
+        }
+      }
+    },
+    "/api/v1/protocol/status": {
+      "get": {
+        "operationId": "getProtocolStatus",
+        "responses": {
+          "200": {
+            "description": "Specification/VRSCTEST/not-operational release status.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProtocolStatus" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProtocolStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["protocol", "stage", "network", "operational", "environment"],
+        "properties": {
+          "protocol": { "const": "Checks & Balances Protocol" },
+          "stage": { "const": "specification" },
+          "network": { "const": "VRSCTEST" },
+          "operational": { "const": false },
+          "environment": { "enum": ["local", "ci", "testnet", "pilot"] }
+        }
+      }
+    }
+  }
+}

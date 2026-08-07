@@ -1,0 +1,51 @@
+{
+  "name": "checks-and-balances-protocol",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Non-operational Checks & Balances Protocol monorepo foundation",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=24.0.0 <25",
+    "pnpm": "11.20.0"
+  },
+  "scripts": {
+    "preinstall": "node scripts/enforce-pnpm.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo run typecheck && tsc -p tsconfig.tools.json --noEmit",
+    "test": "turbo run test",
+    "test:unit": "turbo run test",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "contracts:validate": "tsx scripts/validate-contracts.ts",
+    "db:validate": "pnpm --filter @cbc/db db:validate",
+    "db:migrate": "pnpm --filter @cbc/db db:migrate",
+    "db:migrate:deploy": "pnpm --filter @cbc/db db:migrate:deploy",
+    "db:seed": "pnpm --filter @cbc/db db:seed",
+    "license:check": "node scripts/check-licenses.mjs",
+    "local:up": "docker compose -f infra/docker/compose.yaml up --build",
+    "local:down": "docker compose -f infra/docker/compose.yaml down",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:integration && pnpm test:e2e && pnpm contracts:validate && pnpm db:validate && pnpm build && pnpm license:check"
+  },
+  "devDependencies": {
+    "@cbc/config": "workspace:*",
+    "@apidevtools/swagger-parser": "12.1.0",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.3",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "eslint": "10.8.0",
+    "globals": "17.9.0",
+    "prettier": "3.9.6",
+    "tsx": "4.23.9",
+    "turbo": "2.10.8",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.66.0",
+    "vitest": "4.1.10"
+  }
+}

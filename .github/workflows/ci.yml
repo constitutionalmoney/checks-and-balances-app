@@ -1,0 +1,129 @@
+name: Foundation quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CBC_ENVIRONMENT: ci
+  NODE_VERSION: 24.19.0
+  PNPM_VERSION: 11.20.0
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  quality:
+    name: Lint, types, tests, schemas, build, licences
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:integration
+      - run: pnpm test:e2e
+      - run: pnpm contracts:validate
+      - run: pnpm db:validate
+      - run: pnpm build
+      - run: pnpm license:check
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  local-stack:
+    name: Build and smoke-test local stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Start every local service
+        run: docker compose -f infra/docker/compose.yaml up --detach --build --wait --wait-timeout 300
+      - name: Probe shells and readiness routes
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:4000/ready | grep --fixed-strings '"ready":true'
+          curl --fail --silent --show-error http://127.0.0.1:4000/api/v1/protocol/status | grep --fixed-strings '"operational":false'
+          curl --fail --silent --show-error http://127.0.0.1:4010/ready | grep --fixed-strings '"ready":true'
+          for port in 3100 3101 3102 3103; do
+            curl --fail --silent --show-error "http://127.0.0.1:${port}" | grep --fixed-strings 'Not operational'
+          done
+          curl --fail --silent --show-error http://127.0.0.1:8025/readyz
+          curl --fail --silent --show-error --header 'content-type: application/json' \
+            --data '{"jsonrpc":"2.0","id":"ci","method":"getinfo","params":[]}' \
+            http://127.0.0.1:18080 | grep --fixed-strings '"synthetic":true'
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose -f infra/docker/compose.yaml logs --no-color
+      - name: Stop local stack
+        if: always()
+        run: docker compose -f infra/docker/compose.yaml down --volumes
+
+  container-scan:
+    name: API container scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: infra/docker/Dockerfile.app
+          build-args: CBC_APP=api
+          load: true
+          push: false
+          tags: cbc-api:ci
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: cbc-api:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+  dco:
+    name: DCO sign-off
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node scripts/check-dco.mjs
