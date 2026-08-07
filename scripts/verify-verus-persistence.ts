@@ -19,7 +19,7 @@ const outbox = new OutboxRepository(pool);
 const jobs = new VerusJobRepository(pool);
 const suffix = randomUUID().replaceAll("-", "").slice(0, 12);
 const identity = syntheticIAddress(`identity-${suffix}`);
-const vdxfKey = "i9nwxtKuVYX4MSbeULLiK2ttVi6rUEhh4X";
+const vdxfIdentifier = "i9nwxtKuVYX4MSbeULLiK2ttVi6rUEhh4X";
 const start = new Date("2026-08-07T18:00:00.000Z");
 
 function digest(value: string): string {
@@ -67,7 +67,7 @@ async function enqueue(key: string, reference: string) {
     subjectReference: `subject_verus_synthetic_${suffix}_${key}`,
     targetIdentity: identity,
     vdxfUri: "vrsc::cbc.synthetic.anchor",
-    vdxfKey,
+    vdxfKey: vdxfIdentifier,
     manifest,
     manifestCanonical: canonical,
     manifestDigest,
@@ -96,7 +96,7 @@ async function verifyPersistencePayloadGuard(): Promise<void> {
         subjectReference: `subject_verus_synthetic_${suffix}_rejected`,
         targetIdentity: identity,
         vdxfUri: "vrsc::cbc.synthetic.anchor",
-        vdxfKey,
+        vdxfKey: vdxfIdentifier,
         manifest,
         manifestCanonical: canonical,
         manifestDigest,

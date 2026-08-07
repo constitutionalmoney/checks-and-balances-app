@@ -17,8 +17,17 @@
       "jsonrpc": "2.0",
       "id": "cbc-readiness",
       "result": {
+        "VRSCversion": "1.2.17-3",
+        "version": 2000753,
+        "protocolversion": 170010,
+        "chainid": "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq",
+        "name": "VRSCTEST",
         "chain": "VRSCTEST",
-        "blocks": 1,
+        "blocks": 1000,
+        "longestchain": 1000,
+        "connections": 4,
+        "testnet": true,
+        "errors": "",
         "synthetic": true
       }
     }
