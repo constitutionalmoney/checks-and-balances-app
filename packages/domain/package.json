@@ -4,6 +4,7 @@
   "private": true,
   "description": "Framework-independent protocol domain state machines and invariants",
   "license": "Apache-2.0",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

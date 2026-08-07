@@ -52,6 +52,7 @@ pnpm typecheck
 pnpm test
 pnpm test:integration
 pnpm test:e2e
+pnpm test:persistence # requires a migrated synthetic PostgreSQL database
 pnpm contracts:validate
 pnpm db:validate
 pnpm build
@@ -60,8 +61,10 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-The database schema is intentionally model-free. `db:seed` writes no data and records the
-synthetic-only convention. Issue #16 owns the first protocol/domain migration.
+The database schema contains the issue #16 privacy-minimized domain core. `db:seed` writes no data.
+`test:persistence` creates randomized synthetic records to verify lifecycle, tenancy, expiry,
+idempotency, atomic rollback, audit chaining, and outbox crash recovery; use it only against a
+disposable local/CI database. Compose CI runs it after applying every migration from empty.
 
 ## Environment profiles
 

@@ -2,6 +2,7 @@
   "name": "@cbc/api",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "NestJS/Fastify health and protocol-status shell",
   "license": "Apache-2.0",
   "main": "dist/main.js",

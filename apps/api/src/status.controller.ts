@@ -4,8 +4,8 @@ import { protocolStatus } from "@cbc/contracts";
 import type { RuntimeConfig } from "@cbc/config";
 import type { FastifyReply } from "fastify";
 
-import { DEPENDENCY_CHECKER, RUNTIME_CONFIG } from "./tokens";
-import type { DependencyChecker } from "./readiness";
+import { DEPENDENCY_CHECKER, RUNTIME_CONFIG } from "./tokens.js";
+import type { DependencyChecker } from "./readiness.js";
 
 @ApiTags("foundation")
 @Controller()

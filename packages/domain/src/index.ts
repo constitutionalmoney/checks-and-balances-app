@@ -7,10 +7,91 @@ export {
   beginTestnetProvisioning,
   COMMITTEE_STATES,
   markCommitteeTestnetReady,
+  reactivateCommittee,
   retireCommittee,
+  retireSuspendedCommittee,
   suspendCommittee,
   type CommitteeState,
 } from "./committee.js";
+export {
+  attestationStatusAt,
+  createAttestationValidity,
+  InvalidAttestationValidityError,
+  MAX_ATTESTATION_VALIDITY_DAYS,
+  MAX_ATTESTATION_VALIDITY_MS,
+  type AttestationStatusInput,
+  type AttestationValidity,
+  type CanonicalAttestationStatus,
+} from "./attestation.js";
+export {
+  acknowledgeConsent,
+  CONSENT_STATES,
+  withdrawConsent,
+  type ConsentState,
+} from "./consent.js";
+export {
+  assignAppeal,
+  APPEAL_STATES,
+  beginAppealReview,
+  denyAppealCase,
+  remandAppealCase,
+  upholdAppealCase,
+  withdrawAppealCase,
+  type AppealState,
+} from "./appeal.js";
+export {
+  beginPrivacyRequest,
+  completePrivacyRequest,
+  confirmPrivacyRequester,
+  denyPrivacyRequest,
+  PRIVACY_REQUEST_STATES,
+  withdrawPrivacyRequest,
+  type PrivacyRequestState,
+} from "./privacy-request.js";
+export {
+  beginRenewalCycle,
+  beginRenewalReporting,
+  cancelDraftRenewalCycle,
+  commitEligibleSnapshot,
+  publishRenewalReport,
+  queueRenewalNotices,
+  recordRenewalSelection,
+  RENEWAL_CYCLE_STATES,
+  requestRenewalSelection,
+  type RenewalCycleState,
+} from "./renewal-cycle.js";
+export {
+  cancelPendingNotification,
+  claimNotification,
+  deadLetterNotification,
+  NOTIFICATION_STATES,
+  recordNotificationDelivery,
+  recordRetryableNotificationFailure,
+  recordTerminalNotificationFailure,
+  retryNotification,
+  type NotificationState,
+} from "./notification.js";
+export {
+  activateRelyingPartyClient,
+  approveRelyingPartyClient,
+  beginClientSecurityReview,
+  RELYING_PARTY_CLIENT_STATES,
+  revokeRelyingPartyClient,
+  suspendRelyingPartyClient,
+  type RelyingPartyClientState,
+} from "./relying-party-client.js";
+export {
+  projectPublicAttestation,
+  type InternalAttestationProjectionSource,
+  type PublicAttestationProjection,
+} from "./public-projection.js";
+export {
+  requireEligibleReviewer,
+  ReviewerIneligibleError,
+  type EligibleReviewer,
+  type ReviewerAuthorizationDecision,
+  type ReviewerIneligibilityCode,
+} from "./reviewer-eligibility.js";
 export { InvalidTransitionError, type DomainAggregate } from "./transition.js";
 export {
   activateAttestation,
@@ -22,17 +103,29 @@ export {
   openAppeal,
   recordIssuance,
   rejectVerification,
+  rejectAfterMoreInformation,
   remandAppeal,
   requestIssuance,
   requestMoreInformation,
+  rescheduleAfterMoreInformation,
   revokeAttestation,
   scheduleRequest,
   supersedeAttestation,
   upholdAppeal,
   VERIFICATION_STATES,
   withdrawVerification,
+  withdrawAfterMoreInformation,
   type VerificationState,
 } from "./verification.js";
+export {
+  consumeWalletChallenge,
+  expireWalletChallenge,
+  presentWalletChallenge,
+  recordWalletResponse,
+  rejectWalletResponse,
+  WALLET_CHALLENGE_STATES,
+  type WalletChallengeState,
+} from "./wallet-challenge.js";
 export {
   beginVerusConfirmation,
   beginVerusPreflight,

@@ -22,6 +22,7 @@
     "test:unit": "turbo run test",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:persistence": "tsx scripts/verify-domain-persistence.ts",
     "contracts:validate": "tsx scripts/validate-contracts.ts",
     "db:validate": "pnpm --filter @cbc/db db:validate",
     "db:migrate": "pnpm --filter @cbc/db db:migrate",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@cbc/config": "workspace:*",
+    "@cbc/db": "workspace:*",
     "@apidevtools/swagger-parser": "12.1.0",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",

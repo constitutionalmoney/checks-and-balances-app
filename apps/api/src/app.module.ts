@@ -2,9 +2,9 @@ import type { RuntimeConfig } from "@cbc/config";
 import { Module } from "@nestjs/common";
 import type { DynamicModule } from "@nestjs/common";
 
-import type { DependencyChecker } from "./readiness";
-import { StatusController } from "./status.controller";
-import { DEPENDENCY_CHECKER, RUNTIME_CONFIG } from "./tokens";
+import type { DependencyChecker } from "./readiness.js";
+import { StatusController } from "./status.controller.js";
+import { DEPENDENCY_CHECKER, RUNTIME_CONFIG } from "./tokens.js";
 
 @Module({})
 export class AppModule {

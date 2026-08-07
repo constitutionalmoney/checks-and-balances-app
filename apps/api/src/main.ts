@@ -1,4 +1,4 @@
-import { createApiApp, assertReady } from "./app";
+import { createApiApp, assertReady } from "./app.js";
 
 async function bootstrap(): Promise<void> {
   const { app, config, dependencyChecker } = await createApiApp();

@@ -69,3 +69,11 @@ export function suspendCommittee(currentState: CommitteeState): CommitteeState {
 export function retireCommittee(currentState: CommitteeState): CommitteeState {
   return transition("retireCommittee", currentState, "pilot_approved", "retired");
 }
+
+export function reactivateCommittee(currentState: CommitteeState): CommitteeState {
+  return transition("reactivateCommittee", currentState, "suspended", "active");
+}
+
+export function retireSuspendedCommittee(currentState: CommitteeState): CommitteeState {
+  return transition("retireSuspendedCommittee", currentState, "suspended", "retired");
+}

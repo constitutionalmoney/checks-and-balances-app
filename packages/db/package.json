@@ -4,8 +4,15 @@
   "private": true,
   "description": "Prisma/PostgreSQL foundation and infrastructure readiness probes",
   "license": "Apache-2.0",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -16,6 +23,7 @@
     "db:seed": "tsx src/seed.ts"
   },
   "dependencies": {
+    "@cbc/domain": "workspace:*",
     "@prisma/adapter-pg": "7.9.1",
     "@prisma/client": "7.9.1",
     "ioredis": "6.0.0",

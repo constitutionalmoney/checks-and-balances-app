@@ -50,9 +50,10 @@ INSERT INTO "policy_version" (
 );
 
 INSERT INTO "consent_receipt" (
-  "id", "participant_id", "committee_id", "policy_version_id", "purpose", "acknowledged_at"
+  "id", "external_reference", "participant_id", "committee_id", "policy_version_id", "purpose", "acknowledged_at"
 ) VALUES (
   '00000000-0000-4000-8000-000000000006',
+  'consent_synthetic_001',
   '00000000-0000-4000-8000-000000000003',
   '00000000-0000-4000-8000-000000000002',
   '00000000-0000-4000-8000-000000000005',
@@ -103,7 +104,7 @@ INSERT INTO "audit_event" (
   '00000000-0000-4000-8000-000000000009',
   'committee:committee_synthetic_001',
   NULL,
-  'sha256:synthetic-audit-event-1',
+  'AUTO',
   'test_harness',
   'actor_synthetic_001',
   '00000000-0000-4000-8000-000000000002',

@@ -1,8 +1,8 @@
 import { loadRuntimeConfig } from "@cbc/config";
 import { describe, expect, it } from "vitest";
 
-import { createApiApp } from "./app";
-import type { ReadinessReport } from "./readiness";
+import { createApiApp } from "./app.js";
+import type { ReadinessReport } from "./readiness.js";
 
 const ready: ReadinessReport = {
   ready: true,

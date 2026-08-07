@@ -1,4 +1,14 @@
-export type DomainAggregate = "verification" | "committee" | "verus_job";
+export type DomainAggregate =
+  | "verification"
+  | "committee"
+  | "verus_job"
+  | "renewal_cycle"
+  | "wallet_challenge"
+  | "consent"
+  | "appeal"
+  | "privacy_request"
+  | "notification"
+  | "relying_party_client";
 
 export class InvalidTransitionError extends Error {
   readonly code = "INVALID_STATE_TRANSITION" as const;

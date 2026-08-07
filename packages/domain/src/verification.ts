@@ -65,6 +65,33 @@ export function withdrawVerification(currentState: VerificationState): Verificat
   return transition("withdrawVerification", currentState, "under_review", "withdrawn");
 }
 
+export function rescheduleAfterMoreInformation(currentState: VerificationState): VerificationState {
+  return transition(
+    "rescheduleAfterMoreInformation",
+    currentState,
+    "needs_more_information",
+    "scheduled",
+  );
+}
+
+export function rejectAfterMoreInformation(currentState: VerificationState): VerificationState {
+  return transition(
+    "rejectAfterMoreInformation",
+    currentState,
+    "needs_more_information",
+    "rejected",
+  );
+}
+
+export function withdrawAfterMoreInformation(currentState: VerificationState): VerificationState {
+  return transition(
+    "withdrawAfterMoreInformation",
+    currentState,
+    "needs_more_information",
+    "withdrawn",
+  );
+}
+
 export function requestIssuance(currentState: VerificationState): VerificationState {
   return transition("requestIssuance", currentState, "approved", "issuance_pending");
 }

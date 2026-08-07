@@ -1,1 +1,1 @@
-console.warn("Synthetic seed convention active: WP-01 writes no participant or protocol data.");
+console.warn("Synthetic seed convention active: no real participant or protocol data is written.");

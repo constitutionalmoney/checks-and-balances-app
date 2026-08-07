@@ -165,11 +165,13 @@ infra/
   monitoring/
 ```
 
-The WP-01 application foundation is scaffolded. Every app is an empty shell labelled
+The WP-01 application foundation and issue #16 domain/persistence core are scaffolded. Every app is an empty shell labelled
 **Specification / VRSCTEST / Not operational**. The API exposes only health, readiness, generated
-OpenAPI, and protocol-status routes; the worker registers no protocol jobs. Protocol business
-logic, accounts, sessions, participant collection, committee operations, document uploads, wallet
-flows, Verus writes, and mainnet support remain absent.
+OpenAPI, and protocol-status routes; the worker registers no protocol jobs. Public controllers,
+accounts, participant collection, committee operations UI, document uploads, wallet flows, Verus
+writes, and mainnet support remain absent. Internal packages now provide named lifecycles, exact
+expiry, tenant-safe records, append-only audit, idempotency, and a crash-safe outbox for later
+vertical slices; this does not make a public workflow operational.
 
 ## Development
 
