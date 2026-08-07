@@ -187,6 +187,9 @@ The local stack uses synthetic-only PostgreSQL/Redis dependencies, Mailpit, and 
 Verus `getinfo` endpoint. It creates no object-storage bucket and requires no wallet, private key,
 live RPC credential, production secret, or participant record.
 
+A fail-closed [Dokploy Compose scaffold](./infra/deployment/README.md) is also available for a
+future GitHub-backed VRSCTEST deployment. It is not a production or pilot release configuration.
+
 ## Source-of-truth documents
 
 - [Product Requirements Document](./docs/PRD.md)
@@ -236,7 +239,7 @@ No public pilot or mainnet write is permitted merely because code exists.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md), [GOVERNANCE.md](./GOVERNANCE.md), [SECURITY.md](./SECURITY.md), and the [Developer Certificate of Origin](./DCO.txt) before contributing.
 
-- Start implementation with [issue #15](https://github.com/constitutionalmoney/checks-and-balances-app/issues/15), then follow [docs/ISSUE_ROADMAP.md](./docs/ISSUE_ROADMAP.md).
+- Continue implementation with [issue #16](https://github.com/constitutionalmoney/checks-and-balances-app/issues/16), then follow [docs/ISSUE_ROADMAP.md](./docs/ISSUE_ROADMAP.md).
 - Open or select an issue before substantial implementation.
 - Keep pull requests narrow and tied to an acceptance checklist.
 - Sign every commit with `Signed-off-by: Name <email>`.

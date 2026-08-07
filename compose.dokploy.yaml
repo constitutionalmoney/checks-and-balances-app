@@ -1,0 +1,223 @@
+x-app-build: &app-build
+  context: .
+  dockerfile: infra/docker/Dockerfile.app
+
+x-app-runtime: &app-runtime
+  init: true
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+
+x-runtime-environment: &runtime-environment
+  CBC_ENVIRONMENT: testnet
+  CBC_PROTOCOL_STAGE: specification
+  CBC_RELEASE_STATUS: not_operational
+  CBC_VERUS_NETWORK: VRSCTEST
+  CBC_VERUS_RPC_URL: ${CBC_VERUS_RPC_URL:?Set a private VRSCTEST RPC URL in Dokploy}
+  CBC_VERUS_RPC_USER: ${CBC_VERUS_RPC_USER:?Set the VRSCTEST RPC user in Dokploy}
+  CBC_VERUS_RPC_PASSWORD: ${CBC_VERUS_RPC_PASSWORD:?Set the VRSCTEST RPC password in Dokploy}
+  DATABASE_URL: ${DATABASE_URL:?Set the PostgreSQL connection URL in Dokploy}
+  REDIS_URL: redis://redis:6379
+  CBC_PARTICIPANT_SESSION_AUDIENCE: cbc-participant-app
+  CBC_COMMITTEE_SESSION_AUDIENCE: cbc-committee-console
+  CBC_LOG_LEVEL: ${CBC_LOG_LEVEL:-info}
+  CBC_PUBLIC_DIRECTORY_ENABLED: "false"
+  CBC_PUBLIC_SESSIONS_ENABLED: "false"
+  CBC_VERUS_LINKING_ENABLED: "false"
+  CBC_VERUS_IDENTITY_UPDATE_ENABLED: "false"
+  CBC_COMMITTEE_SIGNING_ENABLED: "false"
+  CBC_RANDOM_RENEWAL_ENABLED: "false"
+  CBC_RMR_ADAPTER_ENABLED: "false"
+  CBC_MAINNET_WRITES_ENABLED: "false"
+  CBC_DOCUMENT_UPLOAD_ENABLED: "false"
+  CBC_UNIQUENESS_CLAIM_ENABLED: "false"
+  CBC_LOCALITY_CLAIM_ENABLED: "false"
+
+services:
+  postgres:
+    image: postgres:18.1-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CBC_POSTGRES_DB:-cbc}
+      POSTGRES_USER: ${CBC_POSTGRES_USER:-cbc}
+      POSTGRES_PASSWORD: ${CBC_POSTGRES_PASSWORD:?Set the PostgreSQL password in Dokploy}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+
+  redis:
+    image: redis:8.2.3-bookworm
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+
+  migrate:
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: api
+    restart: "no"
+    command:
+      [
+        "node",
+        "packages/db/node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy",
+        "--schema",
+        "packages/db/prisma/schema.prisma",
+      ]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the PostgreSQL connection URL in Dokploy}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [private]
+
+  api:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: api
+    environment:
+      <<: *runtime-environment
+      CBC_SERVICE_PORT: 4000
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    expose: ["4000"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [private, verus-egress, web]
+
+  worker:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: worker
+    environment:
+      <<: *runtime-environment
+      CBC_SERVICE_PORT: 4010
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4010/ready').then(r=>{if(!r.ok)process.exit(1)})",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [private, verus-egress]
+
+  participant:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: participant
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    expose: ["3000"]
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [web]
+
+  committee:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: committee
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3001
+    expose: ["3001"]
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [web]
+
+  verify:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: verify
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3002
+    expose: ["3002"]
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [web]
+
+  docs:
+    <<: *app-runtime
+    build:
+      <<: *app-build
+      args:
+        CBC_APP: docs
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3003
+    expose: ["3003"]
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:3003').then(r=>{if(!r.ok)process.exit(1)})"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks: [web]
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  private:
+    internal: true
+  verus-egress:
+  web:
