@@ -17,7 +17,15 @@ RUN pnpm install --frozen-lockfile
 ARG CBC_APP
 RUN pnpm --filter "@cbc/${CBC_APP}..." build
 
-FROM base AS runtime
+FROM debian:bookworm-slim AS runtime
+
+WORKDIR /workspace
+
+RUN apt-get update \
+  && apt-get install --yes --no-install-recommends ca-certificates libatomic1 libstdc++6 openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /usr/local/bin/node /usr/local/bin/node
 
 ARG CBC_APP
 ENV CBC_APP=${CBC_APP}
