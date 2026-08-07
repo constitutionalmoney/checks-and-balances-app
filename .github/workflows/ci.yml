@@ -71,6 +71,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate Dokploy deployment definition
+        env:
+          CBC_POSTGRES_PASSWORD: ci-only-postgres
+          DATABASE_URL: postgresql://cbc:ci-only-postgres@postgres:5432/cbc
+          CBC_VERUS_RPC_URL: http://verusd.internal:27486
+          CBC_VERUS_RPC_USER: ci-only-rpc-user
+          CBC_VERUS_RPC_PASSWORD: ci-only-rpc-password
+        run: docker compose -f compose.dokploy.yaml config --quiet
       - name: Start every local service
         run: docker compose -f infra/docker/compose.yaml up --detach --build --wait --wait-timeout 300
       - name: Probe shells and readiness routes
