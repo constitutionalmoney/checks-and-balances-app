@@ -1,0 +1,98 @@
+{
+  "fixture": "cbc.vrsctest.vdxf.v1",
+  "network": {
+    "name": "VRSCTEST",
+    "chainId": "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq",
+    "nodeRelease": "1.2.17-3",
+    "nodeVersion": 2000753
+  },
+  "owner": {
+    "fullyQualifiedName": "cbc-protocol-test.VRSCTEST@",
+    "identityAddress": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+    "registrationTransactionId": "1791d7b56c7f3a4248025cbf4110586fbe65b79216d05191e434a28361ef5413",
+    "registrationBlockHeight": 1180058,
+    "minimumSignatures": 1,
+    "recoveryAuthority": "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+    "revocationAuthority": "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+    "status": "active"
+  },
+  "uriRules": {
+    "prefix": "cbc-protocol-test.VRSCTEST::v1.",
+    "versioning": "The first path segment is an immutable major version. Breaking changes require v2; additive compatible schema revisions retain v1 and use artifact semantic versions.",
+    "shortNamespaceAllowed": false
+  },
+  "keys": [
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.attestation.human",
+      "vdxfId": "iKc5RdXteW91Y6uA3ZgpAprj5AJNi9b6Qw",
+      "hash160": "d625feb9b6fefe386dd201effcd59ec34ea1efb0",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "private_signed_credential",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.attestation.method",
+      "vdxfId": "iMrUsgo1KmHw2XWRJA6dnm4Jo6pMo1Y2uY",
+      "hash160": "34c6aa1deb2a33a1e51c19ab5d6113de924799c9",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "private_signed_credential",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.attestation.validity",
+      "vdxfId": "i5XNjdxAUte6s3hxb4uD93NtwDFepzhUYr",
+      "hash160": "3a95bde60cad80ea4b00275cd25116e5473d7a16",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "private_signed_credential",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.attestation.revocation",
+      "vdxfId": "i7WdcHsfhE8w39CW4F4N7H1UyU79nVuyti",
+      "hash160": "97e265012ee0045a05c0cb7285018194997d462c",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "private_signed_credential_status",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.attestation.policy",
+      "vdxfId": "iH917hB9sQsgxFzJDBhew2PptxtPHCN8tA",
+      "hash160": "0c30c1f897cfea967796a693db9bffcbe58ce095",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "private_signed_credential_policy_reference",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.proof.reference",
+      "vdxfId": "iPjXTdaVYCEJnkyh2qThXGZB54UpV2cy9F",
+      "hash160": "7f1066789ad308a0c202b0f29d95ded608c738de",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "optional_participant_public_reference",
+      "baselinePublicWrite": false
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.anchor.schema",
+      "vdxfId": "iQxTRgN4ZaYQcWAspPfsNS5YFHTEahLgEP",
+      "hash160": "748d81f9b7050481aaf80ab0c47f556992f1a2eb",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "public_protocol_anchor",
+      "baselinePublicWrite": true
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.anchor.policy",
+      "vdxfId": "iQ5w3DRVthprX1NriFaSbKumMUpe9nyUAX",
+      "hash160": "72721c77d44298d0b0f7ba8987bdfff28cc714e2",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "public_protocol_anchor",
+      "baselinePublicWrite": true
+    },
+    {
+      "uri": "cbc-protocol-test.VRSCTEST::v1.anchor.cycle_report",
+      "vdxfId": "iJLfbKwekbK8PoNCmDjJr7dXdcFL82ygRC",
+      "hash160": "da439eaea8dca6535de83571eb91d4b3c95e0da3",
+      "namespace": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "classification": "public_aggregate_anchor",
+      "baselinePublicWrite": true
+    }
+  ]
+}

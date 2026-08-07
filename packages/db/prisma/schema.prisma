@@ -740,6 +740,7 @@ model OutboxEvent {
   committee          Committee?      @relation(fields: [committeeId], references: [id], onDelete: Restrict)
   attempts           OutboxAttempt[]
   verusJob           VerusJob?
+  anchorRecord       AnchorRecord?
 
   @@index([state, availableAt])
   @@index([leaseExpiresAt])
@@ -763,25 +764,40 @@ model OutboxAttempt {
 }
 
 model VerusJob {
-  id               String        @id @db.Uuid
-  outboxEventId    String        @unique @map("outbox_event_id") @db.Uuid
-  committeeId      String?       @map("committee_id") @db.Uuid
-  network          VerusNetwork  @default(VRSCTEST)
-  chainId          String        @map("chain_id")
-  operationType    String        @map("operation_type")
-  subjectReference String        @map("subject_reference")
-  vdxfKey          String        @default("") @map("vdxf_key")
-  manifestDigest   String        @map("manifest_digest")
-  state            VerusJobState @default(PENDING)
-  transactionId    String?       @map("transaction_id")
-  blockHeight      BigInt?       @map("block_height")
-  blockHash        String?       @map("block_hash")
-  readbackDigest   String?       @map("readback_digest")
-  version          Int           @default(1)
-  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
-  outboxEvent      OutboxEvent   @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
-  committee        Committee?    @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  id                      String        @id @db.Uuid
+  outboxEventId           String        @unique @map("outbox_event_id") @db.Uuid
+  committeeId             String?       @map("committee_id") @db.Uuid
+  network                 VerusNetwork  @default(VRSCTEST)
+  chainId                 String        @map("chain_id")
+  operationType           String        @map("operation_type")
+  subjectReference        String        @map("subject_reference")
+  vdxfKey                 String        @default("") @map("vdxf_key")
+  vdxfUri                 String?       @map("vdxf_uri")
+  targetIdentity          String?       @map("target_identity")
+  manifestDigest          String        @map("manifest_digest")
+  manifest                Json?         @map("manifest_json")
+  manifestCanonical       String?       @map("manifest_canonical")
+  manifestPolicyReference String?       @map("manifest_policy_reference")
+  manifestAllowedFields   String[]      @default([]) @map("manifest_allowed_fields")
+  manifestRequiredFields  String[]      @default([]) @map("manifest_required_fields")
+  manifestMaximumBytes    Int?          @map("manifest_maximum_bytes")
+  confirmationRequirement Int           @default(1) @map("confirmation_requirement")
+  state                   VerusJobState @default(PENDING)
+  transactionId           String?       @map("transaction_id")
+  blockHeight             BigInt?       @map("block_height")
+  blockHash               String?       @map("block_hash")
+  readbackDigest          String?       @map("readback_digest")
+  submissionAmbiguous     Boolean       @default(false) @map("submission_ambiguous")
+  lastErrorClass          String?       @map("last_error_class")
+  submittedAt             DateTime?     @map("submitted_at") @db.Timestamptz(6)
+  confirmedAt             DateTime?     @map("confirmed_at") @db.Timestamptz(6)
+  readbackAt              DateTime?     @map("readback_at") @db.Timestamptz(6)
+  reorgDetectedAt         DateTime?     @map("reorg_detected_at") @db.Timestamptz(6)
+  version                 Int           @default(1)
+  createdAt               DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  outboxEvent             OutboxEvent   @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+  committee               Committee?    @relation(fields: [committeeId], references: [id], onDelete: Restrict)
 
   @@unique([network, operationType, subjectReference, vdxfKey, manifestDigest], map: "verus_job_deterministic_identity_key")
   @@index([state, createdAt])
@@ -1373,6 +1389,7 @@ model AnchorRecord {
   createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
   committee         Committee?   @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  outboxEvent       OutboxEvent  @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
 
   @@unique([network, anchorType, subjectReference, vdxfKey, manifestDigest])
   @@index([committeeId, state])

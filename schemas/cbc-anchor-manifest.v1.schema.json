@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.checksandbalances.services/schemas/cbc-anchor-manifest.v1.schema.json",
+  "title": "Checks & Balances Protocol Anchor Manifest v1",
+  "description": "A privacy-minimized VRSCTEST manifest for anchoring a public schema, policy, or aggregate cycle-report artifact. It never contains participant records or evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "environment", "anchorType", "artifact", "namespace", "supersedes"],
+  "properties": {
+    "schema": {
+      "const": "cbc.anchor.manifest.v1"
+    },
+    "environment": {
+      "const": "vrsctest"
+    },
+    "anchorType": {
+      "type": "string",
+      "enum": ["schema", "policy", "cycle_report"]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "version", "mediaType", "canonicalization", "sha256"],
+      "properties": {
+        "repository": {
+          "const": "https://github.com/constitutionalmoney/checks-and-balances-app"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(schemas|docs)/(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$"
+        },
+        "mediaType": {
+          "type": "string",
+          "enum": ["application/schema+json", "application/json", "text/markdown"]
+        },
+        "canonicalization": {
+          "const": "cbc-json-v1"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "namespace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ownerIdentity", "vdxfUri", "vdxfId"],
+      "oneOf": [
+        {
+          "properties": {
+            "vdxfUri": { "const": "cbc-protocol-test.VRSCTEST::v1.anchor.schema" },
+            "vdxfId": { "const": "iQxTRgN4ZaYQcWAspPfsNS5YFHTEahLgEP" }
+          }
+        },
+        {
+          "properties": {
+            "vdxfUri": { "const": "cbc-protocol-test.VRSCTEST::v1.anchor.policy" },
+            "vdxfId": { "const": "iQ5w3DRVthprX1NriFaSbKumMUpe9nyUAX" }
+          }
+        },
+        {
+          "properties": {
+            "vdxfUri": { "const": "cbc-protocol-test.VRSCTEST::v1.anchor.cycle_report" },
+            "vdxfId": { "const": "iJLfbKwekbK8PoNCmDjJr7dXdcFL82ygRC" }
+          }
+        }
+      ],
+      "properties": {
+        "ownerIdentity": {
+          "const": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM"
+        },
+        "vdxfUri": {
+          "type": "string",
+          "enum": [
+            "cbc-protocol-test.VRSCTEST::v1.anchor.schema",
+            "cbc-protocol-test.VRSCTEST::v1.anchor.policy",
+            "cbc-protocol-test.VRSCTEST::v1.anchor.cycle_report"
+          ]
+        },
+        "vdxfId": {
+          "type": "string",
+          "enum": [
+            "iQxTRgN4ZaYQcWAspPfsNS5YFHTEahLgEP",
+            "iQ5w3DRVthprX1NriFaSbKumMUpe9nyUAX",
+            "iJLfbKwekbK8PoNCmDjJr7dXdcFL82ygRC"
+          ]
+        }
+      }
+    },
+    "supersedes": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

@@ -436,6 +436,13 @@ network + operation_type + subject_identity_or_committee + vdxf_key + manifest_d
 
 After an RPC timeout, search identity content/transaction history for the digest before resubmitting.
 
+The durable implementation stores the canonical manifest and server-selected policy snapshot on
+the immutable Verus job, while the outbox retains only an opaque reference and digest. Leases and
+attempts survive restarts; active work is serialized per target identity; known transaction IDs are
+reconfirmed rather than resubmitted; and ambiguous submissions cannot automatically resubmit until
+exact digest readback proves the prior outcome. Worker metrics use bounded state/error labels only.
+Operational response is defined in [`runbooks/verus-worker.md`](./runbooks/verus-worker.md).
+
 ### 9.3 Publishing patterns
 
 MVP uses:

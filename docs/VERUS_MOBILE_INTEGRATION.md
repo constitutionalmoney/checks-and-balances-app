@@ -50,7 +50,7 @@ Provision distinct VRSCTEST identities for:
 ```text
 cbc-app-auth-test@          Signs participant/committee authentication requests
 cbc-app-proof-test@         Signs optional participant public-proof update requests
-cbc-protocol-test@          Owns the project VDXF namespace and protocol metadata
+cbc-protocol-test.VRSCTEST@ Owns the approved VRSCTEST project VDXF namespace and protocol metadata
 cbc-kelowna-committee-test@ Example committee identity for test fixtures
 ```
 
@@ -344,21 +344,23 @@ Any fallback must have documented custody, threshold, approval, rotation, audit,
 
 Older issues proposed `vrsc::identity.attestation.cbc.*`. Do not use that namespace without documented authority.
 
-Recommended owned namespace examples:
+The approved VRSCTEST namespace is owned by `cbc-protocol-test.VRSCTEST@` as recorded in
+ADR 0006. Its v1 URIs are:
 
 ```text
-cbc::v1.attestation.human
-cbc::v1.attestation.method
-cbc::v1.attestation.validity
-cbc::v1.attestation.revocation
-cbc::v1.attestation.policy
-cbc::v1.proof.reference
-cbc::v1.anchor.schema
-cbc::v1.anchor.policy
-cbc::v1.anchor.cycle_report
+cbc-protocol-test.VRSCTEST::v1.attestation.human
+cbc-protocol-test.VRSCTEST::v1.attestation.method
+cbc-protocol-test.VRSCTEST::v1.attestation.validity
+cbc-protocol-test.VRSCTEST::v1.attestation.revocation
+cbc-protocol-test.VRSCTEST::v1.attestation.policy
+cbc-protocol-test.VRSCTEST::v1.proof.reference
+cbc-protocol-test.VRSCTEST::v1.anchor.schema
+cbc-protocol-test.VRSCTEST::v1.anchor.policy
+cbc-protocol-test.VRSCTEST::v1.anchor.cycle_report
 ```
 
-The final URI may need the fully qualified owning VerusID namespace. For every key:
+The `.VRSCTEST` qualifier is required. The shorter `cbc-protocol-test::...` form derives a
+different namespace and is not approved. For every key:
 
 1. define human-readable meaning and privacy classification;
 2. derive using `getvdxfid` on VRSCTEST;

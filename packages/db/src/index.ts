@@ -21,6 +21,8 @@ export {
 export {
   OutboxRepository,
   type OutboxClaim,
+  type OutboxClaimOptions,
+  type OutboxQueueStats,
   type OutboxWorkerContext,
   type RetryFailureOptions,
 } from "./outbox-repository.js";
@@ -49,6 +51,14 @@ export {
   type RecordReviewDecisionInput,
   type VerificationRecord,
 } from "./verification-repository.js";
+export {
+  VerusJobRepository,
+  VERUS_ANCHOR_EVENT_TYPE,
+  VRSCTEST_CHAIN_ID,
+  type EnqueueVerusAnchorInput,
+  type PersistedVerusJobState,
+  type VerusJobRecord,
+} from "./verus-job-repository.js";
 
 export interface DependencyCheck {
   readonly ok: boolean;

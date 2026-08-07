@@ -1,0 +1,62 @@
+groups:
+  - name: cbc-verus-worker
+    rules:
+      - alert: CbcVerusQueueAgeHigh
+        expr: cbc_verus_outbox_oldest_age_seconds > 300 and cbc_verus_worker_paused == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Verus durable queue age exceeds five minutes
+          runbook: docs/runbooks/verus-worker.md#queue-age-or-repeated-failures
+
+      - alert: CbcVerusRpcFailuresHigh
+        expr: sum(increase(cbc_verus_rpc_failures_total[10m])) > 5 and cbc_verus_worker_paused == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Verus RPC failures exceed the pilot threshold
+          runbook: docs/runbooks/verus-worker.md#queue-age-or-repeated-failures
+
+      - alert: CbcVerusNodeUnsynchronized
+        expr: cbc_verus_node_synchronized == 0 and cbc_verus_worker_paused == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Verus write preflight reports an unsynchronized node
+          runbook: docs/runbooks/verus-worker.md#node-recovery
+
+      - alert: CbcVerusWrongNetwork
+        expr: increase(cbc_verus_wrong_network_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: Verus worker rejected a wrong network or chain identifier
+          runbook: docs/runbooks/verus-worker.md#wrong-network
+
+      - alert: CbcVerusConfirmationStalled
+        expr: increase(cbc_verus_rpc_failures_total{class="CONFIRMATION_PENDING"}[15m]) > 3 and max_over_time(cbc_verus_confirmation_count[15m]) == min_over_time(cbc_verus_confirmation_count[15m])
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Verus transaction confirmation is not progressing
+          runbook: docs/runbooks/verus-worker.md#confirmation-or-reorg
+
+      - alert: CbcVerusReadbackMismatch
+        expr: increase(cbc_verus_readback_mismatch_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: Confirmed Verus content failed exact digest readback
+          runbook: docs/runbooks/verus-worker.md#readback-mismatch
+
+      - alert: CbcVerusReorgDetected
+        expr: increase(cbc_verus_reorg_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: Confirmed Verus evidence moved off the canonical chain
+          runbook: docs/runbooks/verus-worker.md#confirmation-or-reorg

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "BullMQ worker and readiness shell with no jobs or protocol behaviour",
+  "description": "Durable private VRSCTEST outbox worker and readiness service",
   "license": "Apache-2.0",
   "main": "dist/main.js",
   "scripts": {

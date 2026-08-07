@@ -155,16 +155,38 @@ describe("committee lifecycle", () => {
 
 describe("Verus job lifecycle", () => {
   it("allows only the issue-defined named transitions", () => {
-    verifyTransitionTable<VerusJobState>(VERUS_JOB_STATES, [
-      { command: claimVerusJob, from: "pending", to: "claimed" },
-      { command: beginVerusPreflight, from: "claimed", to: "preflight" },
-      { command: recordVerusSubmission, from: "preflight", to: "submitted" },
-      { command: beginVerusConfirmation, from: "submitted", to: "confirming" },
-      { command: beginVerusReadback, from: "confirming", to: "readback" },
-      { command: verifyVerusReadback, from: "readback", to: "verified" },
-      { command: recordRetryableVerusFailure, from: "readback", to: "retryable_failed" },
-      { command: recordTerminalVerusFailure, from: "readback", to: "terminal_failed" },
-      { command: markVerusReorgPending, from: "readback", to: "reorg_pending" },
-    ]);
+    const cases = [
+      {
+        command: claimVerusJob,
+        allowed: ["pending", "retryable_failed", "reorg_pending"],
+        to: "claimed",
+      },
+      { command: beginVerusPreflight, allowed: ["claimed"], to: "preflight" },
+      { command: recordVerusSubmission, allowed: ["preflight"], to: "submitted" },
+      { command: beginVerusConfirmation, allowed: ["submitted"], to: "confirming" },
+      { command: beginVerusReadback, allowed: ["confirming"], to: "readback" },
+      { command: verifyVerusReadback, allowed: ["readback"], to: "verified" },
+      {
+        command: recordRetryableVerusFailure,
+        allowed: ["preflight", "submitted", "confirming", "readback"],
+        to: "retryable_failed",
+      },
+      {
+        command: recordTerminalVerusFailure,
+        allowed: ["preflight", "submitted", "confirming", "readback", "retryable_failed"],
+        to: "terminal_failed",
+      },
+      { command: markVerusReorgPending, allowed: ["confirming", "readback"], to: "reorg_pending" },
+    ] as const;
+
+    for (const { command, allowed, to } of cases) {
+      for (const state of VERUS_JOB_STATES) {
+        if ((allowed as readonly VerusJobState[]).includes(state)) {
+          expect(command(state)).toBe(to);
+        } else {
+          expect(() => command(state)).toThrow(InvalidTransitionError);
+        }
+      }
+    }
   });
 });

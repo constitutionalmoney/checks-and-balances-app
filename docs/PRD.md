@@ -54,7 +54,7 @@ Where historical archived website material conflicts with the current protocol p
 | VerusID account linking | Planned |
 | Verus Mobile permission flow | Planned |
 | Participant-controlled identity update | Optional future capability; not required for baseline verification |
-| VDXF schema and namespace | Planned; namespace not final |
+| VDXF schema and namespace | VRSCTEST namespace and anchor-manifest v1 approved in ADR 0006; remaining schemas/fixtures planned |
 | Status API, SDK, relying-party terms | Not live |
 | Rate My Representatives integration | Planned; disabled by default |
 | Mainnet writes | Prohibited until a separate production gate |

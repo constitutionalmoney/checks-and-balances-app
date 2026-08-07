@@ -60,7 +60,7 @@ This document is the repository’s public truth table for what is **fixed**, **
 | Verus Mobile authentication | `planned` | Signed wallet request/response flow is planned. | Compatibility spike and replay-safe implementation required. |
 | Participant identity update | `planned_optional` | An opt-in public proof reference may be added only with explicit wallet approval. | Feature flag off by default; never required for baseline status. |
 | Committee VerusID | `planned` | Committee identity and authority will use Verus. | Provision and rehearse on VRSCTEST with recovery and revocation. |
-| VDXF namespace | `unfinished` | Older `vrsc::...` proposal is not approved; use an owned namespace unless authority is documented. | Block schema finalization until namespace decision and `getvdxfid` fixtures. |
+| VDXF namespace | `approved_testnet` | `cbc-protocol-test.VRSCTEST@` owns the v1 VRSCTEST namespace; ADR 0006 and deterministic `getvdxfid` fixtures are authoritative. | Use only the fully qualified approved URI/key allowlist; mainnet remains prohibited. |
 | On-chain raw evidence | `prohibited` | Connected apps receive minimum status, not the evidence dossier. | Schema and worker reject forbidden fields and oversize payloads. |
 | Private canonical database | `recommended_architecture` | Operational records require a private transactional store. | PostgreSQL is canonical for people, sessions, decisions, appeals, and status. |
 | Privacy-safe anchors | `planned` | Schema/policy/cycle-report provenance may be anchored. | VRSCTEST worker, asynchronous and read back. |

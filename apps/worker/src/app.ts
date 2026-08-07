@@ -3,6 +3,8 @@ import { checkPostgres, checkRedis } from "@cbc/db";
 import { checkVerusReadiness } from "@cbc/verus";
 import Fastify, { type FastifyInstance } from "fastify";
 
+import { VerusWorkerMetrics } from "./verus-metrics.js";
+
 export interface WorkerReadinessReport {
   readonly ready: boolean;
   readonly dependencies: Readonly<
@@ -31,17 +33,20 @@ export async function checkWorkerDependencies(
 export interface WorkerServerOptions {
   readonly config?: RuntimeConfig;
   readonly dependencyChecker?: WorkerDependencyChecker;
+  readonly metrics?: VerusWorkerMetrics;
 }
 
 export interface WorkerServer {
   readonly server: FastifyInstance;
   readonly config: RuntimeConfig;
   readonly dependencyChecker: WorkerDependencyChecker;
+  readonly metrics: VerusWorkerMetrics;
 }
 
 export async function createWorkerServer(options: WorkerServerOptions = {}): Promise<WorkerServer> {
   const config = options.config ?? loadRuntimeConfig(process.env);
   const dependencyChecker = options.dependencyChecker ?? (() => checkWorkerDependencies(config));
+  const metrics = options.metrics ?? new VerusWorkerMetrics();
   const server = Fastify({
     logger: {
       level: config.CBC_LOG_LEVEL,
@@ -72,6 +77,10 @@ export async function createWorkerServer(options: WorkerServerOptions = {}): Pro
     }
     return report;
   });
+  server.get("/metrics", async (_request, reply) => {
+    reply.header("content-type", "text/plain; version=0.0.4; charset=utf-8");
+    return metrics.render();
+  });
 
-  return { server, config, dependencyChecker };
+  return { server, config, dependencyChecker, metrics };
 }

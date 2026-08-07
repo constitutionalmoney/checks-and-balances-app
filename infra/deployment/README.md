@@ -32,7 +32,8 @@ incident controls, and approval of an actual testnet deployment.
 | `docs`        |           3003 | `docs.testnet.checksandbalances.services`      |
 
 Do not add a domain to `postgres`, `redis`, `migrate`, or `worker`. Never create a public RPC
-domain.
+domain. Scrape the worker's `/metrics` endpoint only from the private monitoring network; it is not
+an ingress route.
 
 ## Required Dokploy environment
 

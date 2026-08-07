@@ -25,7 +25,19 @@ export interface OutboxClaim {
   readonly payloadReference: string;
   readonly payloadDigest: string;
   readonly attempt: number;
+  readonly createdAt: Date;
   readonly leaseExpiresAt: Date;
+}
+
+export interface OutboxClaimOptions {
+  readonly eventTypes?: readonly string[];
+  /** Serializes active work sharing the same event type and aggregate identity. */
+  readonly singleWriterByAggregate?: boolean;
+}
+
+export interface OutboxQueueStats {
+  readonly readyCount: number;
+  readonly oldestReadyAt?: Date;
 }
 
 interface OutboxRow {
@@ -43,6 +55,7 @@ interface OutboxRow {
   readonly lease_acquired_at: Date | null;
   readonly lease_expires_at: Date | null;
   readonly attempt_count: number;
+  readonly created_at: Date;
 }
 
 export interface RetryFailureOptions {
@@ -59,11 +72,13 @@ export class OutboxRepository {
     worker: OutboxWorkerContext,
     observedAt: Date,
     leaseDurationMs: number,
+    options: OutboxClaimOptions = {},
   ): Promise<OutboxClaim | null> {
     requireOpaqueReference(worker.workerReference, "worker reference");
     if (!Number.isInteger(leaseDurationMs) || leaseDurationMs <= 0) {
       throw new RepositoryConflictError("lease duration must be a positive integer");
     }
+    const eventTypes = this.validateEventTypes(options.eventTypes);
 
     return inSerializableTransaction(this.pool, async (client) => {
       const candidate = await client.query<OutboxRow>(
@@ -72,9 +87,19 @@ export class OutboxRepository {
          LEFT JOIN "committee" c ON c."id" = o."committee_id"
          WHERE ((o."state" IN ('pending','retryable_failed') AND o."available_at" <= $1)
             OR (o."state" = 'claimed' AND o."lease_expires_at" <= $1))
+           AND ($2::text[] IS NULL OR o."event_type" = ANY($2))
+           AND (NOT $3::boolean OR NOT EXISTS (
+             SELECT 1 FROM "outbox_event" active
+             WHERE active."id" <> o."id"
+               AND active."event_type" = o."event_type"
+               AND active."aggregate_type" = o."aggregate_type"
+               AND active."aggregate_reference" = o."aggregate_reference"
+               AND active."state" = 'claimed'
+               AND active."lease_expires_at" > $1
+           ))
          ORDER BY o."available_at", o."created_at", o."id"
          FOR UPDATE OF o SKIP LOCKED LIMIT 1`,
-        [observedAt],
+        [observedAt, eventTypes ?? null, options.singleWriterByAggregate ?? false],
       );
       const row = candidate.rows[0];
       if (!row) return null;
@@ -134,9 +159,27 @@ export class OutboxRepository {
         payloadReference: row.payload_reference,
         payloadDigest: row.payload_digest,
         attempt: claimed.rows[0]!.attempt_count,
+        createdAt: row.created_at,
         leaseExpiresAt,
       };
     });
+  }
+
+  async queueStats(observedAt: Date, eventTypes?: readonly string[]): Promise<OutboxQueueStats> {
+    const allowedTypes = this.validateEventTypes(eventTypes);
+    const result = await this.pool.query<{ ready_count: string; oldest_ready_at: Date | null }>(
+      `SELECT COUNT(*)::text AS "ready_count", MIN("created_at") AS "oldest_ready_at"
+       FROM "outbox_event"
+       WHERE (("state" IN ('pending','retryable_failed') AND "available_at" <= $1)
+          OR ("state" = 'claimed' AND "lease_expires_at" <= $1))
+         AND ($2::text[] IS NULL OR "event_type" = ANY($2))`,
+      [observedAt, allowedTypes ?? null],
+    );
+    const row = result.rows[0]!;
+    return {
+      readyCount: Number(row.ready_count),
+      ...(row.oldest_ready_at ? { oldestReadyAt: row.oldest_ready_at } : undefined),
+    };
   }
 
   async heartbeat(
@@ -367,5 +410,16 @@ export class OutboxRepository {
     if (!/^[a-z][a-z0-9_]{2,63}$/.test(errorClass)) {
       throw new RepositoryConflictError("error class must be a non-sensitive stable code");
     }
+  }
+
+  private validateEventTypes(eventTypes?: readonly string[]): readonly string[] | undefined {
+    if (eventTypes === undefined) return undefined;
+    if (
+      eventTypes.length === 0 ||
+      eventTypes.some((value) => !/^[a-z][a-z0-9_.-]{2,127}$/.test(value))
+    ) {
+      throw new RepositoryConflictError("event type filters must be non-empty stable codes");
+    }
+    return [...new Set(eventTypes)];
   }
 }

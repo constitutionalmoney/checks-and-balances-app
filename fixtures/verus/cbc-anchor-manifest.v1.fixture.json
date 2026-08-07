@@ -1,0 +1,35 @@
+{
+  "fixture": "cbc.vrsctest.anchor.schema.synthetic.v1",
+  "payload": {
+    "schema": "cbc.anchor.manifest.v1",
+    "environment": "vrsctest",
+    "anchorType": "schema",
+    "artifact": {
+      "repository": "https://github.com/constitutionalmoney/checks-and-balances-app",
+      "path": "schemas/cbc-human-attestation.schema.json",
+      "version": "1.0.0",
+      "mediaType": "application/schema+json",
+      "canonicalization": "cbc-json-v1",
+      "sha256": "b7eb3fd43709f12ae6948a1ff0498d32fe0d84e7d5f331aaa4670732796cfa74"
+    },
+    "namespace": {
+      "ownerIdentity": "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM",
+      "vdxfUri": "cbc-protocol-test.VRSCTEST::v1.anchor.schema",
+      "vdxfId": "iQxTRgN4ZaYQcWAspPfsNS5YFHTEahLgEP"
+    },
+    "supersedes": null
+  },
+  "expected": {
+    "canonicalization": "cbc-json-v1",
+    "byteLength": 577,
+    "sha256": "f6807399ff037eb92fb3b60aa67c1f2ee34e4f412d709801c4d21576d44fc0ce"
+  },
+  "liveEvidence": {
+    "network": "VRSCTEST",
+    "transactionId": "a8f9a1108ebc58408b08ac79e7520658b2c580bf59e3cf0e29a265f7613287a6",
+    "blockHeight": 1180085,
+    "blockHash": "00000000075a6a75e54cef329b093239a02ac719e34859b6a0db6b07163514ab",
+    "readbackDigest": "f6807399ff037eb92fb3b60aa67c1f2ee34e4f412d709801c4d21576d44fc0ce",
+    "status": "verified"
+  }
+}
