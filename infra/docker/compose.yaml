@@ -14,8 +14,8 @@ x-app-environment: &app-environment
   CBC_DOCUMENT_UPLOAD_ENABLED: "false"
 
 x-runtime-dependencies: &runtime-dependencies
-  postgres:
-    condition: service_healthy
+  migrate:
+    condition: service_completed_successfully
   redis:
     condition: service_healthy
   fake-verus-rpc:
@@ -37,6 +37,28 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    networks: [private]
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.app
+      args:
+        CBC_APP: api
+    command:
+      [
+        "node",
+        "packages/db/node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy",
+        "--schema",
+        "packages/db/prisma/schema.prisma",
+      ]
+    environment:
+      DATABASE_URL: postgresql://cbc:cbc_local_only@postgres:5432/cbc
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks: [private]
 
   redis:

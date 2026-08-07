@@ -45,6 +45,7 @@ describe("WP-01 reproducibility contract", () => {
     const compose = await readFile("infra/docker/compose.yaml", "utf8");
     for (const service of [
       "postgres:",
+      "migrate:",
       "redis:",
       "mailpit:",
       "fake-verus-rpc:",
