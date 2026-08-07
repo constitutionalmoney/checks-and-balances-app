@@ -1,5 +1,46 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { Client } from "pg";
+
+export { Pool } from "pg";
+
+export {
+  AttestationRepository,
+  type AttestationRecord,
+  type IssueAttestationInput,
+  type MutateAttestationInput,
+  type RevokeAttestationInput,
+} from "./attestation-repository.js";
+export {
+  OutboxRepository,
+  type OutboxClaim,
+  type OutboxWorkerContext,
+  type RetryFailureOptions,
+} from "./outbox-repository.js";
+export {
+  LifecycleRepository,
+  type AppealLifecycleCommand,
+  type CommitteeLifecycleCommand,
+  type LifecycleRecord,
+  type LifecycleTransitionInput,
+  type NotificationLifecycleCommand,
+  type PrivacyLifecycleCommand,
+  type RelyingPartyLifecycleCommand,
+  type RenewalLifecycleCommand,
+  type WalletChallengeCommand,
+} from "./lifecycle-repository.js";
+export {
+  IdempotencyConflictError,
+  RepositoryConflictError,
+  TenantBoundaryError,
+  type CommandActor,
+  type CommandContext,
+} from "./repository-types.js";
+export {
+  VerificationRepository,
+  type CreateVerificationRequestInput,
+  type RecordReviewDecisionInput,
+  type VerificationRecord,
+} from "./verification-repository.js";
 
 export interface DependencyCheck {
   readonly ok: boolean;

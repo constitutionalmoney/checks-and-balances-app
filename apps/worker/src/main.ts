@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
 
-import { createWorkerServer } from "./app";
+import { createWorkerServer } from "./app.js";
 
 function redisConnection(urlValue: string) {
   const url = new URL(urlValue);

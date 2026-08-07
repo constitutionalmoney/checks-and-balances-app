@@ -81,6 +81,15 @@ jobs:
         run: docker compose -f compose.dokploy.yaml config --quiet
       - name: Start every local service
         run: docker compose -f infra/docker/compose.yaml up --detach --build --wait --wait-timeout 300
+      - name: Validate persistence constraints from a clean migration
+        run: >-
+          docker compose -f infra/docker/compose.yaml exec -T postgres
+          psql --username cbc --dbname cbc
+          < packages/db/prisma/persistence-smoke.sql
+      - name: Execute synthetic lifecycle and crash-recovery verification
+        run: >-
+          docker compose -f infra/docker/compose.yaml exec -T api
+          node node_modules/tsx/dist/cli.mjs scripts/verify-domain-persistence.ts
       - name: Probe shells and readiness routes
         run: |
           curl --fail --silent --show-error http://127.0.0.1:4000/ready | grep --fixed-strings '"ready":true'

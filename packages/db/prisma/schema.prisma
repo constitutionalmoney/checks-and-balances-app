@@ -7,5 +7,1128 @@ datasource db {
   provider = "postgresql"
 }
 
-// WP-01 intentionally defines no protocol or participant models.
-// Issue #16 owns the first reviewed domain migration.
+enum CommitteeState {
+  PROPOSED             @map("proposed")
+  FORMING              @map("forming")
+  POLICY_REVIEW        @map("policy_review")
+  TESTNET_PROVISIONING @map("testnet_provisioning")
+  TESTNET_READY        @map("testnet_ready")
+  PILOT_REVIEW         @map("pilot_review")
+  PILOT_APPROVED       @map("pilot_approved")
+  ACTIVE               @map("active")
+  SUSPENDED            @map("suspended")
+  RETIRED              @map("retired")
+
+  @@map("committee_state")
+}
+
+enum PolicyVersionState {
+  DRAFT    @map("draft")
+  APPROVED @map("approved")
+  RETIRED  @map("retired")
+
+  @@map("policy_version_state")
+}
+
+enum IdempotencyState {
+  STARTED   @map("started")
+  COMPLETED @map("completed")
+  REJECTED  @map("rejected")
+  FAILED    @map("failed")
+
+  @@map("idempotency_state")
+}
+
+enum AuditResult {
+  SUCCEEDED @map("succeeded")
+  REJECTED  @map("rejected")
+  FAILED    @map("failed")
+
+  @@map("audit_result")
+}
+
+enum OutboxState {
+  PENDING          @map("pending")
+  CLAIMED          @map("claimed")
+  SUCCEEDED        @map("succeeded")
+  RETRYABLE_FAILED @map("retryable_failed")
+  TERMINAL_FAILED  @map("terminal_failed")
+  DEAD_LETTER      @map("dead_letter")
+
+  @@map("outbox_state")
+}
+
+enum VerusNetwork {
+  VRSCTEST
+
+  @@map("verus_network")
+}
+
+enum VerusJobState {
+  PENDING          @map("pending")
+  CLAIMED          @map("claimed")
+  PREFLIGHT        @map("preflight")
+  SUBMITTED        @map("submitted")
+  CONFIRMING       @map("confirming")
+  READBACK         @map("readback")
+  VERIFIED         @map("verified")
+  RETRYABLE_FAILED @map("retryable_failed")
+  TERMINAL_FAILED  @map("terminal_failed")
+  REORG_PENDING    @map("reorg_pending")
+
+  @@map("verus_job_state")
+}
+
+enum MembershipState {
+  PROPOSED  @map("proposed")
+  ACTIVE    @map("active")
+  SUSPENDED @map("suspended")
+  RETIRED   @map("retired")
+
+  @@map("membership_state")
+}
+
+enum ReadinessState {
+  PENDING        @map("pending")
+  IN_REVIEW      @map("in_review")
+  SATISFIED      @map("satisfied")
+  BLOCKED        @map("blocked")
+  NOT_APPLICABLE @map("not_applicable")
+
+  @@map("readiness_state")
+}
+
+enum VerificationState {
+  REQUESTED              @map("requested")
+  SCHEDULED              @map("scheduled")
+  CHECKED_IN             @map("checked_in")
+  UNDER_REVIEW           @map("under_review")
+  APPROVED               @map("approved")
+  REJECTED               @map("rejected")
+  NEEDS_MORE_INFORMATION @map("needs_more_information")
+  WITHDRAWN              @map("withdrawn")
+  ISSUANCE_PENDING       @map("issuance_pending")
+  ISSUED                 @map("issued")
+  ACTIVE                 @map("active")
+  EXPIRED                @map("expired")
+  REVOKED                @map("revoked")
+  SUPERSEDED             @map("superseded")
+  APPEALED               @map("appealed")
+  APPEAL_UPHELD          @map("appeal_upheld")
+  APPEAL_DENIED          @map("appeal_denied")
+  APPEAL_REMANDED        @map("appeal_remanded")
+
+  @@map("verification_state")
+}
+
+enum SessionState {
+  DRAFT     @map("draft")
+  SCHEDULED @map("scheduled")
+  OPEN      @map("open")
+  CLOSED    @map("closed")
+  CANCELLED @map("cancelled")
+
+  @@map("session_state")
+}
+
+enum AppointmentState {
+  RESERVED   @map("reserved")
+  CONFIRMED  @map("confirmed")
+  CHECKED_IN @map("checked_in")
+  COMPLETED  @map("completed")
+  CANCELLED  @map("cancelled")
+  NO_SHOW    @map("no_show")
+
+  @@map("appointment_state")
+}
+
+enum AttendanceState {
+  EXPECTED   @map("expected")
+  CHECKED_IN @map("checked_in")
+  PRESENT    @map("present")
+  DEPARTED   @map("departed")
+  ABSENT     @map("absent")
+
+  @@map("attendance_state")
+}
+
+enum EvidenceReviewResult {
+  MATCHED                @map("matched")
+  NOT_MATCHED            @map("not_matched")
+  NEEDS_MORE_INFORMATION @map("needs_more_information")
+
+  @@map("evidence_review_result")
+}
+
+enum EvidenceRetention {
+  NOT_RETAINED @map("not_retained")
+
+  @@map("evidence_retention")
+}
+
+enum ReviewDecisionState {
+  APPROVED               @map("approved")
+  REJECTED               @map("rejected")
+  NEEDS_MORE_INFORMATION @map("needs_more_information")
+
+  @@map("review_decision_state")
+}
+
+enum AttestationState {
+  ISSUED     @map("issued")
+  ACTIVE     @map("active")
+  EXPIRED    @map("expired")
+  REVOKED    @map("revoked")
+  SUPERSEDED @map("superseded")
+
+  @@map("attestation_state")
+}
+
+enum RenewalCycleState {
+  DRAFT              @map("draft")
+  SNAPSHOT_COMMITTED @map("snapshot_committed")
+  SELECTION_PENDING  @map("selection_pending")
+  SELECTION_READY    @map("selection_ready")
+  NOTICES_PENDING    @map("notices_pending")
+  IN_PROGRESS        @map("in_progress")
+  REPORTING          @map("reporting")
+  PUBLISHED          @map("published")
+  CANCELLED          @map("cancelled")
+
+  @@map("renewal_cycle_state")
+}
+
+enum WalletChallengeState {
+  CREATED           @map("created")
+  PRESENTED         @map("presented")
+  RESPONSE_RECEIVED @map("response_received")
+  CONSUMED          @map("consumed")
+  EXPIRED           @map("expired")
+  REJECTED          @map("rejected")
+
+  @@map("wallet_challenge_state")
+}
+
+enum ConsentState {
+  PENDING      @map("pending")
+  ACKNOWLEDGED @map("acknowledged")
+  WITHDRAWN    @map("withdrawn")
+
+  @@map("consent_state")
+}
+
+enum AppealState {
+  OPENED       @map("opened")
+  ASSIGNED     @map("assigned")
+  UNDER_REVIEW @map("under_review")
+  UPHELD       @map("upheld")
+  DENIED       @map("denied")
+  REMANDED     @map("remanded")
+  WITHDRAWN    @map("withdrawn")
+
+  @@map("appeal_state")
+}
+
+enum PrivacyRequestKind {
+  ACCESS      @map("access")
+  CORRECTION  @map("correction")
+  DELETION    @map("deletion")
+  RESTRICTION @map("restriction")
+
+  @@map("privacy_request_kind")
+}
+
+enum PrivacyRequestState {
+  REQUESTED          @map("requested")
+  IDENTITY_CONFIRMED @map("identity_confirmed")
+  PROCESSING         @map("processing")
+  COMPLETED          @map("completed")
+  DENIED             @map("denied")
+  WITHDRAWN          @map("withdrawn")
+
+  @@map("privacy_request_state")
+}
+
+enum NotificationState {
+  PENDING          @map("pending")
+  CLAIMED          @map("claimed")
+  DELIVERED        @map("delivered")
+  RETRYABLE_FAILED @map("retryable_failed")
+  TERMINAL_FAILED  @map("terminal_failed")
+  DEAD_LETTER      @map("dead_letter")
+  CANCELLED        @map("cancelled")
+
+  @@map("notification_state")
+}
+
+enum RelyingPartyClientState {
+  PROPOSED        @map("proposed")
+  SECURITY_REVIEW @map("security_review")
+  APPROVED        @map("approved")
+  ACTIVE          @map("active")
+  SUSPENDED       @map("suspended")
+  REVOKED         @map("revoked")
+
+  @@map("relying_party_client_state")
+}
+
+enum ContactChannel {
+  EMAIL @map("email")
+
+  @@map("contact_channel")
+}
+
+enum CredentialState {
+  ACTIVE   @map("active")
+  DISABLED @map("disabled")
+  REVOKED  @map("revoked")
+
+  @@map("credential_state")
+}
+
+enum IdentityLinkState {
+  ACTIVE                @map("active")
+  REVALIDATION_REQUIRED @map("revalidation_required")
+  UNLINKED              @map("unlinked")
+
+  @@map("identity_link_state")
+}
+
+enum ProtocolReleaseState {
+  DRAFT   @map("draft")
+  TESTNET @map("testnet")
+  RETIRED @map("retired")
+
+  @@map("protocol_release_state")
+}
+
+enum CapabilityState {
+  DISABLED      @map("disabled")
+  SPECIFICATION @map("specification")
+  VRSCTEST_DEMO @map("vrsctest_demo")
+
+  @@map("capability_state")
+}
+
+enum AnchorState {
+  PENDING          @map("pending")
+  SUBMITTED        @map("submitted")
+  CONFIRMING       @map("confirming")
+  READBACK         @map("readback")
+  VERIFIED         @map("verified")
+  RETRYABLE_FAILED @map("retryable_failed")
+  TERMINAL_FAILED  @map("terminal_failed")
+  REORG_PENDING    @map("reorg_pending")
+
+  @@map("anchor_state")
+}
+
+model Jurisdiction {
+  id                String      @id @db.Uuid
+  externalReference String      @unique @map("external_reference")
+  kind              String
+  displayName       String      @map("display_name")
+  boundaryReference String?     @map("boundary_reference")
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  committees        Committee[]
+
+  @@map("jurisdiction")
+}
+
+model Committee {
+  id                   String                   @id @db.Uuid
+  externalReference    String                   @unique @map("external_reference")
+  slug                 String                   @unique
+  displayName          String                   @map("display_name")
+  state                CommitteeState           @default(PROPOSED)
+  jurisdictionId       String                   @map("jurisdiction_id") @db.Uuid
+  version              Int                      @default(1)
+  createdAt            DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
+  jurisdiction         Jurisdiction             @relation(fields: [jurisdictionId], references: [id], onDelete: Restrict)
+  consentReceipts      ConsentReceipt[]
+  idempotency          IdempotencyRecord[]
+  auditEvents          AuditEvent[]
+  outboxEvents         OutboxEvent[]
+  verusJobs            VerusJob[]
+  members              CommitteeMember[]
+  roles                CommitteeRole[]
+  readinessItems       ReadinessChecklistItem[]
+  verificationRequests VerificationRequest[]
+  verificationSessions VerificationSession[]
+  appointments         Appointment[]
+  attendanceRecords    SessionAttendance[]
+  evidenceReviews      EvidenceReviewRecord[]
+  reviewDecisions      ReviewDecision[]
+  attestations         Attestation[]
+  renewalCycles        RenewalCycle[]
+  appeals              Appeal[]
+  privacyRequests      PrivacyRightsRequest[]
+  relyingPartyClients  RelyingPartyClient[]
+  notifications        Notification[]
+  anchorRecords        AnchorRecord[]
+
+  @@index([jurisdictionId, state])
+  @@map("committee")
+}
+
+model ParticipantAccount {
+  id                   String                 @id @db.Uuid
+  externalReference    String                 @unique @map("external_reference")
+  version              Int                    @default(1)
+  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  consentReceipts      ConsentReceipt[]
+  contactPreferences   ContactPreference[]
+  committeeMemberships CommitteeMember[]
+  passkeys             PasskeyMetadata[]
+  verusIdentityLinks   VerusIdentityLink[]
+  walletChallenges     WalletChallenge[]
+  verificationRequests VerificationRequest[]
+  appointments         Appointment[]
+  attendanceRecords    SessionAttendance[]
+  attestations         Attestation[]
+  appeals              Appeal[]
+  privacyRequests      PrivacyRightsRequest[]
+  notifications        Notification[]
+  correctionRequests   CorrectionRequest[]
+
+  @@map("participant_account")
+}
+
+model PolicyDocument {
+  id        String          @id @db.Uuid
+  policyKey String          @unique @map("policy_key")
+  title     String
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  versions  PolicyVersion[]
+
+  @@map("policy_document")
+}
+
+model PolicyVersion {
+  id               String             @id @db.Uuid
+  policyDocumentId String             @map("policy_document_id") @db.Uuid
+  version          String
+  state            PolicyVersionState @default(DRAFT)
+  contentDigest    String             @map("content_digest")
+  contentReference String?            @map("content_reference")
+  effectiveAt      DateTime?          @map("effective_at") @db.Timestamptz(6)
+  retiredAt        DateTime?          @map("retired_at") @db.Timestamptz(6)
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  policyDocument   PolicyDocument     @relation(fields: [policyDocumentId], references: [id], onDelete: Restrict)
+  consentReceipts  ConsentReceipt[]
+
+  @@unique([policyDocumentId, version])
+  @@index([state, effectiveAt])
+  @@map("policy_version")
+}
+
+model ConsentReceipt {
+  id                String             @id @db.Uuid
+  externalReference String             @unique @map("external_reference")
+  participantId     String             @map("participant_id") @db.Uuid
+  committeeId       String?            @map("committee_id") @db.Uuid
+  policyVersionId   String             @map("policy_version_id") @db.Uuid
+  purpose           String
+  state             ConsentState       @default(ACKNOWLEDGED)
+  version           Int                @default(1)
+  acknowledgedAt    DateTime?          @map("acknowledged_at") @db.Timestamptz(6)
+  withdrawnAt       DateTime?          @map("withdrawn_at") @db.Timestamptz(6)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  committee         Committee?         @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  policyVersion     PolicyVersion      @relation(fields: [policyVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([participantId, policyVersionId, purpose])
+  @@index([committeeId, acknowledgedAt])
+  @@map("consent_receipt")
+}
+
+model IdempotencyRecord {
+  id              String           @id @db.Uuid
+  scope           String
+  keyHash         String           @map("key_hash")
+  requestDigest   String           @map("request_digest")
+  command         String
+  actorType       String           @map("actor_type")
+  actorReference  String           @map("actor_reference")
+  committeeId     String?          @map("committee_id") @db.Uuid
+  state           IdempotencyState @default(STARTED)
+  resultDigest    String?          @map("result_digest")
+  resultReference String?          @map("result_reference")
+  resultState     String?          @map("result_state")
+  resultVersion   Int?             @map("result_version")
+  startedAt       DateTime         @default(now()) @map("started_at") @db.Timestamptz(6)
+  completedAt     DateTime?        @map("completed_at") @db.Timestamptz(6)
+  expiresAt       DateTime?        @map("expires_at") @db.Timestamptz(6)
+  committee       Committee?       @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([scope, keyHash])
+  @@index([state, expiresAt])
+  @@map("idempotency_record")
+}
+
+model AuditChainHead {
+  chainKey  String   @id @map("chain_key")
+  eventId   String?  @map("event_id") @db.Uuid
+  eventHash String?  @map("event_hash")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("audit_chain_head")
+}
+
+model AuditEvent {
+  sequence           BigInt      @id @default(autoincrement())
+  id                 String      @unique @db.Uuid
+  chainKey           String      @map("chain_key")
+  previousHash       String?     @map("previous_hash")
+  eventHash          String      @unique @map("event_hash")
+  actorType          String      @map("actor_type")
+  actorReference     String      @map("actor_reference")
+  committeeId        String?     @map("committee_id") @db.Uuid
+  command            String
+  targetType         String      @map("target_type")
+  targetReference    String      @map("target_reference")
+  priorState         String?     @map("prior_state")
+  newState           String?     @map("new_state")
+  policyVersion      String?     @map("policy_version")
+  softwareVersion    String      @map("software_version")
+  reasonCategory     String?     @map("reason_category")
+  authentication     String      @map("authentication_strength")
+  correlationId      String      @map("correlation_id")
+  idempotencyKeyHash String?     @map("idempotency_key_hash")
+  result             AuditResult
+  occurredAt         DateTime    @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  committee          Committee?  @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@index([chainKey, sequence])
+  @@index([committeeId, occurredAt])
+  @@index([correlationId])
+  @@map("audit_event")
+}
+
+model OutboxEvent {
+  id                 String          @id @db.Uuid
+  committeeId        String?         @map("committee_id") @db.Uuid
+  eventType          String          @map("event_type")
+  aggregateType      String          @map("aggregate_type")
+  aggregateReference String          @map("aggregate_reference")
+  schemaVersion      String          @map("schema_version")
+  payloadReference   String          @map("payload_reference")
+  payloadDigest      String          @map("payload_digest")
+  idempotencyKeyHash String          @unique @map("idempotency_key_hash")
+  state              OutboxState     @default(PENDING)
+  availableAt        DateTime        @default(now()) @map("available_at") @db.Timestamptz(6)
+  leaseOwner         String?         @map("lease_owner")
+  leaseAcquiredAt    DateTime?       @map("lease_acquired_at") @db.Timestamptz(6)
+  leaseExpiresAt     DateTime?       @map("lease_expires_at") @db.Timestamptz(6)
+  attemptCount       Int             @default(0) @map("attempt_count")
+  lastErrorClass     String?         @map("last_error_class")
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  completedAt        DateTime?       @map("completed_at") @db.Timestamptz(6)
+  committee          Committee?      @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  attempts           OutboxAttempt[]
+  verusJob           VerusJob?
+
+  @@index([state, availableAt])
+  @@index([leaseExpiresAt])
+  @@index([committeeId, createdAt])
+  @@map("outbox_event")
+}
+
+model OutboxAttempt {
+  id            String      @id @db.Uuid
+  outboxEventId String      @map("outbox_event_id") @db.Uuid
+  attempt       Int
+  worker        String
+  result        AuditResult
+  errorClass    String?     @map("error_class")
+  startedAt     DateTime    @map("started_at") @db.Timestamptz(6)
+  finishedAt    DateTime    @map("finished_at") @db.Timestamptz(6)
+  outboxEvent   OutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@unique([outboxEventId, attempt])
+  @@map("outbox_attempt")
+}
+
+model VerusJob {
+  id               String        @id @db.Uuid
+  outboxEventId    String        @unique @map("outbox_event_id") @db.Uuid
+  committeeId      String?       @map("committee_id") @db.Uuid
+  network          VerusNetwork  @default(VRSCTEST)
+  chainId          String        @map("chain_id")
+  operationType    String        @map("operation_type")
+  subjectReference String        @map("subject_reference")
+  vdxfKey          String        @default("") @map("vdxf_key")
+  manifestDigest   String        @map("manifest_digest")
+  state            VerusJobState @default(PENDING)
+  transactionId    String?       @map("transaction_id")
+  blockHeight      BigInt?       @map("block_height")
+  blockHash        String?       @map("block_hash")
+  readbackDigest   String?       @map("readback_digest")
+  version          Int           @default(1)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  outboxEvent      OutboxEvent   @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+  committee        Committee?    @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([network, operationType, subjectReference, vdxfKey, manifestDigest], map: "verus_job_deterministic_identity_key")
+  @@index([state, createdAt])
+  @@index([committeeId, createdAt])
+  @@map("verus_job")
+}
+
+model CommitteeMember {
+  id                String                @id @db.Uuid
+  externalReference String                @unique @map("external_reference")
+  committeeId       String                @map("committee_id") @db.Uuid
+  participantId     String?               @map("participant_id") @db.Uuid
+  actorReference    String                @map("actor_reference")
+  state             MembershipState       @default(PROPOSED)
+  version           Int                   @default(1)
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  committee         Committee             @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant       ParticipantAccount?   @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  roles             CommitteeMemberRole[]
+  conflicts         ConflictDeclaration[]
+
+  @@unique([id, committeeId])
+  @@unique([committeeId, actorReference])
+  @@index([committeeId, state])
+  @@map("committee_member")
+}
+
+model CommitteeRole {
+  id                String                @id @db.Uuid
+  externalReference String                @unique @map("external_reference")
+  committeeId       String                @map("committee_id") @db.Uuid
+  roleKey           String                @map("role_key")
+  policyVersionId   String                @map("policy_version_id") @db.Uuid
+  state             MembershipState       @default(PROPOSED)
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee         Committee             @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  members           CommitteeMemberRole[]
+
+  @@unique([id, committeeId])
+  @@unique([committeeId, roleKey, policyVersionId])
+  @@map("committee_role")
+}
+
+model CommitteeMemberRole {
+  id          String          @id @db.Uuid
+  committeeId String          @map("committee_id") @db.Uuid
+  memberId    String          @map("member_id") @db.Uuid
+  roleId      String          @map("role_id") @db.Uuid
+  state       MembershipState @default(PROPOSED)
+  grantedAt   DateTime        @map("granted_at") @db.Timestamptz(6)
+  revokedAt   DateTime?       @map("revoked_at") @db.Timestamptz(6)
+  member      CommitteeMember @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  role        CommitteeRole   @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([memberId, roleId])
+  @@index([committeeId, state])
+  @@map("committee_member_role")
+}
+
+model ConflictDeclaration {
+  id              String          @id @db.Uuid
+  committeeId     String          @map("committee_id") @db.Uuid
+  memberId        String          @map("member_id") @db.Uuid
+  targetType      String          @map("target_type")
+  targetReference String          @map("target_reference")
+  reasonCategory  String          @map("reason_category")
+  declaredAt      DateTime        @map("declared_at") @db.Timestamptz(6)
+  resolvedAt      DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  member          CommitteeMember @relation(fields: [memberId], references: [id], onDelete: Restrict)
+
+  @@unique([memberId, targetType, targetReference])
+  @@index([committeeId, targetReference])
+  @@map("conflict_declaration")
+}
+
+model ReadinessChecklistItem {
+  id                String         @id @db.Uuid
+  externalReference String         @unique @map("external_reference")
+  committeeId       String         @map("committee_id") @db.Uuid
+  itemKey           String         @map("item_key")
+  policyVersionId   String         @map("policy_version_id") @db.Uuid
+  state             ReadinessState @default(PENDING)
+  reviewerReference String?        @map("reviewer_reference")
+  reviewedAt        DateTime?      @map("reviewed_at") @db.Timestamptz(6)
+  version           Int            @default(1)
+  committee         Committee      @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([committeeId, itemKey, policyVersionId])
+  @@index([committeeId, state])
+  @@map("readiness_checklist_item")
+}
+
+model ContactPreference {
+  id                   String             @id @db.Uuid
+  participantId        String             @map("participant_id") @db.Uuid
+  channel              ContactChannel
+  destinationReference String             @map("destination_reference")
+  verifiedAt           DateTime?          @map("verified_at") @db.Timestamptz(6)
+  disabledAt           DateTime?          @map("disabled_at") @db.Timestamptz(6)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  participant          ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([participantId, channel, destinationReference])
+  @@map("contact_preference")
+}
+
+model PasskeyMetadata {
+  id                  String             @id @db.Uuid
+  participantId       String             @map("participant_id") @db.Uuid
+  credentialReference String             @unique @map("credential_reference")
+  relyingPartyId      String             @map("relying_party_id")
+  state               CredentialState    @default(ACTIVE)
+  signCount           BigInt             @default(0) @map("sign_count")
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt          DateTime?          @map("last_used_at") @db.Timestamptz(6)
+  participant         ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([participantId, state])
+  @@map("passkey_metadata")
+}
+
+model VerusIdentityLink {
+  id                String             @id @db.Uuid
+  externalReference String             @unique @map("external_reference")
+  participantId     String             @map("participant_id") @db.Uuid
+  identityAddress   String             @map("identity_address")
+  network           VerusNetwork       @default(VRSCTEST)
+  proofDigest       String             @map("proof_digest")
+  state             IdentityLinkState  @default(ACTIVE)
+  linkedAt          DateTime           @map("linked_at") @db.Timestamptz(6)
+  revalidatedAt     DateTime?          @map("revalidated_at") @db.Timestamptz(6)
+  unlinkedAt        DateTime?          @map("unlinked_at") @db.Timestamptz(6)
+  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([participantId, network, identityAddress])
+  @@map("verus_identity_link")
+}
+
+model WalletChallenge {
+  id                String               @id @db.Uuid
+  externalReference String               @unique @map("external_reference")
+  participantId     String               @map("participant_id") @db.Uuid
+  state             WalletChallengeState @default(CREATED)
+  network           VerusNetwork         @default(VRSCTEST)
+  nonceHash         String               @unique @map("nonce_hash")
+  audience          String
+  requestDigest     String               @map("request_digest")
+  expiresAt         DateTime             @map("expires_at") @db.Timestamptz(6)
+  consumedAt        DateTime?            @map("consumed_at") @db.Timestamptz(6)
+  version           Int                  @default(1)
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  participant       ParticipantAccount   @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([participantId, state, expiresAt])
+  @@map("wallet_challenge")
+}
+
+model VerificationRequest {
+  id                String             @id @db.Uuid
+  externalReference String             @unique @map("external_reference")
+  committeeId       String             @map("committee_id") @db.Uuid
+  participantId     String             @map("participant_id") @db.Uuid
+  policyVersionId   String             @map("policy_version_id") @db.Uuid
+  state             VerificationState  @default(REQUESTED)
+  version           Int                @default(1)
+  requestedAt       DateTime           @default(now()) @map("requested_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  committee         Committee          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([id, committeeId])
+  @@index([committeeId, state])
+  @@index([participantId, requestedAt])
+  @@map("verification_request")
+}
+
+model VerificationSession {
+  id                String       @id @db.Uuid
+  externalReference String       @unique @map("external_reference")
+  committeeId       String       @map("committee_id") @db.Uuid
+  policyVersionId   String       @map("policy_version_id") @db.Uuid
+  state             SessionState @default(DRAFT)
+  startsAt          DateTime     @map("starts_at") @db.Timestamptz(6)
+  endsAt            DateTime     @map("ends_at") @db.Timestamptz(6)
+  locationReference String       @map("location_reference")
+  capacity          Int
+  version           Int          @default(1)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee         Committee    @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([id, committeeId])
+  @@index([committeeId, startsAt])
+  @@map("verification_session")
+}
+
+model Appointment {
+  id                  String             @id @db.Uuid
+  externalReference   String             @unique @map("external_reference")
+  committeeId         String             @map("committee_id") @db.Uuid
+  sessionId           String             @map("session_id") @db.Uuid
+  requestId           String             @map("request_id") @db.Uuid
+  participantId       String             @map("participant_id") @db.Uuid
+  state               AppointmentState   @default(RESERVED)
+  appointmentCodeHash String             @unique @map("appointment_code_hash")
+  scheduledAt         DateTime           @map("scheduled_at") @db.Timestamptz(6)
+  version             Int                @default(1)
+  committee           Committee          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant         ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([id, committeeId])
+  @@unique([sessionId, requestId])
+  @@index([committeeId, sessionId, state])
+  @@map("appointment")
+}
+
+model SessionAttendance {
+  id            String             @id @db.Uuid
+  committeeId   String             @map("committee_id") @db.Uuid
+  sessionId     String             @map("session_id") @db.Uuid
+  requestId     String             @map("request_id") @db.Uuid
+  participantId String             @map("participant_id") @db.Uuid
+  state         AttendanceState    @default(EXPECTED)
+  checkedInAt   DateTime?          @map("checked_in_at") @db.Timestamptz(6)
+  completedAt   DateTime?          @map("completed_at") @db.Timestamptz(6)
+  version       Int                @default(1)
+  committee     Committee          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant   ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, requestId])
+  @@index([committeeId, state])
+  @@map("session_attendance")
+}
+
+model EvidenceReviewRecord {
+  id                   String               @id @db.Uuid
+  externalReference    String               @unique @map("external_reference")
+  committeeId          String               @map("committee_id") @db.Uuid
+  requestId            String               @map("request_id") @db.Uuid
+  sessionId            String               @map("session_id") @db.Uuid
+  reviewerMemberId     String               @map("reviewer_member_id") @db.Uuid
+  policyVersionId      String               @map("policy_version_id") @db.Uuid
+  evidencePathCategory String               @map("evidence_path_category")
+  result               EvidenceReviewResult
+  retention            EvidenceRetention    @default(NOT_RETAINED)
+  reviewedAt           DateTime             @map("reviewed_at") @db.Timestamptz(6)
+  committee            Committee            @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([requestId, reviewerMemberId])
+  @@index([committeeId, reviewedAt])
+  @@map("evidence_review_record")
+}
+
+model ReviewDecision {
+  id                          String              @id @db.Uuid
+  externalReference           String              @unique @map("external_reference")
+  committeeId                 String              @map("committee_id") @db.Uuid
+  requestId                   String              @map("request_id") @db.Uuid
+  reviewerMemberId            String              @map("reviewer_member_id") @db.Uuid
+  policyVersionId             String              @map("policy_version_id") @db.Uuid
+  state                       ReviewDecisionState
+  reasonCategory              String              @map("reason_category")
+  authorizationDecisionDigest String              @map("authorization_decision_digest")
+  conflictCheckedAt           DateTime            @map("conflict_checked_at") @db.Timestamptz(6)
+  decidedAt                   DateTime            @map("decided_at") @db.Timestamptz(6)
+  committee                   Committee           @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([requestId, reviewerMemberId])
+  @@index([committeeId, decidedAt])
+  @@map("review_decision")
+}
+
+model Attestation {
+  id                String                 @id @db.Uuid
+  externalReference String                 @unique @map("external_reference")
+  committeeId       String                 @map("committee_id") @db.Uuid
+  participantId     String                 @map("participant_id") @db.Uuid
+  requestId         String                 @map("request_id") @db.Uuid
+  policyVersionId   String                 @map("policy_version_id") @db.Uuid
+  version           Int
+  state             AttestationState       @default(ISSUED)
+  validFrom         DateTime               @map("valid_from") @db.Timestamptz(6)
+  expiresAt         DateTime               @map("expires_at") @db.Timestamptz(6)
+  issuanceComplete  Boolean                @default(false) @map("issuance_complete")
+  supersedesId      String?                @unique @map("supersedes_id") @db.Uuid
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee         Committee              @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant       ParticipantAccount     @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  supersedes        Attestation?           @relation("AttestationSupersession", fields: [supersedesId], references: [id], onDelete: Restrict)
+  supersededBy      Attestation?           @relation("AttestationSupersession")
+  status            AttestationStatus?
+  revocation        AttestationRevocation?
+
+  @@unique([id, committeeId])
+  @@unique([committeeId, participantId, version])
+  @@index([participantId, expiresAt])
+  @@index([committeeId, state])
+  @@map("attestation")
+}
+
+model AttestationStatus {
+  attestationId String           @id @map("attestation_id") @db.Uuid
+  committeeId   String           @map("committee_id") @db.Uuid
+  state         AttestationState
+  effectiveAt   DateTime         @map("effective_at") @db.Timestamptz(6)
+  version       Int              @default(1)
+  attestation   Attestation      @relation(fields: [attestationId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, state])
+  @@map("attestation_status")
+}
+
+model AttestationRevocation {
+  id              String      @id @db.Uuid
+  attestationId   String      @unique @map("attestation_id") @db.Uuid
+  committeeId     String      @map("committee_id") @db.Uuid
+  policyVersionId String      @map("policy_version_id") @db.Uuid
+  reasonCategory  String      @map("reason_category")
+  effectiveAt     DateTime    @map("effective_at") @db.Timestamptz(6)
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  attestation     Attestation @relation(fields: [attestationId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, effectiveAt])
+  @@map("attestation_revocation")
+}
+
+model RenewalCycle {
+  id                String             @id @db.Uuid
+  externalReference String             @unique @map("external_reference")
+  committeeId       String             @map("committee_id") @db.Uuid
+  policyVersionId   String             @map("policy_version_id") @db.Uuid
+  state             RenewalCycleState  @default(DRAFT)
+  periodStartsAt    DateTime           @map("period_starts_at") @db.Timestamptz(6)
+  periodEndsAt      DateTime           @map("period_ends_at") @db.Timestamptz(6)
+  version           Int                @default(1)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee         Committee          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  snapshots         EligibleSnapshot[]
+  selections        CycleSelection[]
+  report            CycleReport?
+
+  @@unique([id, committeeId])
+  @@index([committeeId, periodStartsAt])
+  @@map("renewal_cycle")
+}
+
+model EligibleSnapshot {
+  id             String       @id @db.Uuid
+  renewalCycleId String       @map("renewal_cycle_id") @db.Uuid
+  committeeId    String       @map("committee_id") @db.Uuid
+  snapshotDigest String       @map("snapshot_digest")
+  eligibleCount  Int          @map("eligible_count")
+  committedAt    DateTime     @map("committed_at") @db.Timestamptz(6)
+  cycle          RenewalCycle @relation(fields: [renewalCycleId], references: [id], onDelete: Restrict)
+
+  @@unique([renewalCycleId, snapshotDigest])
+  @@index([committeeId, committedAt])
+  @@map("eligible_snapshot")
+}
+
+model CycleSelection {
+  id                       String       @id @db.Uuid
+  renewalCycleId           String       @map("renewal_cycle_id") @db.Uuid
+  committeeId              String       @map("committee_id") @db.Uuid
+  selectedSubjectReference String       @map("selected_subject_reference")
+  selectionProofDigest     String       @map("selection_proof_digest")
+  algorithmReference       String       @map("algorithm_reference")
+  selectedAt               DateTime     @map("selected_at") @db.Timestamptz(6)
+  cycle                    RenewalCycle @relation(fields: [renewalCycleId], references: [id], onDelete: Restrict)
+
+  @@unique([renewalCycleId, selectedSubjectReference])
+  @@index([committeeId, selectedAt])
+  @@map("cycle_selection")
+}
+
+model CycleReport {
+  id                String       @id @db.Uuid
+  externalReference String       @unique @map("external_reference")
+  renewalCycleId    String       @unique @map("renewal_cycle_id") @db.Uuid
+  committeeId       String       @map("committee_id") @db.Uuid
+  reportDigest      String       @map("report_digest")
+  eligibleCount     Int          @map("eligible_count")
+  selectedCount     Int          @map("selected_count")
+  renewedCount      Int          @map("renewed_count")
+  expiredCount      Int          @map("expired_count")
+  suppressed        Boolean      @default(true)
+  publishedAt       DateTime?    @map("published_at") @db.Timestamptz(6)
+  cycle             RenewalCycle @relation(fields: [renewalCycleId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, publishedAt])
+  @@map("cycle_report")
+}
+
+model Appeal {
+  id                String             @id @db.Uuid
+  externalReference String             @unique @map("external_reference")
+  committeeId       String             @map("committee_id") @db.Uuid
+  participantId     String             @map("participant_id") @db.Uuid
+  targetReference   String             @map("target_reference")
+  policyVersionId   String             @map("policy_version_id") @db.Uuid
+  state             AppealState        @default(OPENED)
+  reasonCategory    String             @map("reason_category")
+  assignedReference String?            @map("assigned_reference")
+  version           Int                @default(1)
+  openedAt          DateTime           @default(now()) @map("opened_at") @db.Timestamptz(6)
+  resolvedAt        DateTime?          @map("resolved_at") @db.Timestamptz(6)
+  committee         Committee          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, state])
+  @@index([participantId, openedAt])
+  @@map("appeal")
+}
+
+model CorrectionRequest {
+  id                String              @id @db.Uuid
+  externalReference String              @unique @map("external_reference")
+  participantId     String              @map("participant_id") @db.Uuid
+  committeeId       String?             @map("committee_id") @db.Uuid
+  targetType        String              @map("target_type")
+  targetReference   String              @map("target_reference")
+  fieldCategory     String              @map("field_category")
+  policyVersionId   String              @map("policy_version_id") @db.Uuid
+  state             PrivacyRequestState @default(REQUESTED)
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  completedAt       DateTime?           @map("completed_at") @db.Timestamptz(6)
+  participant       ParticipantAccount  @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, state])
+  @@map("correction_request")
+}
+
+model PrivacyRightsRequest {
+  id                  String              @id @db.Uuid
+  externalReference   String              @unique @map("external_reference")
+  participantId       String              @map("participant_id") @db.Uuid
+  committeeId         String?             @map("committee_id") @db.Uuid
+  kind                PrivacyRequestKind
+  policyVersionId     String              @map("policy_version_id") @db.Uuid
+  state               PrivacyRequestState @default(REQUESTED)
+  identityProofDigest String?             @map("identity_proof_digest")
+  version             Int                 @default(1)
+  requestedAt         DateTime            @default(now()) @map("requested_at") @db.Timestamptz(6)
+  completedAt         DateTime?           @map("completed_at") @db.Timestamptz(6)
+  committee           Committee?          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant         ParticipantAccount  @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([committeeId, state])
+  @@index([participantId, requestedAt])
+  @@map("privacy_rights_request")
+}
+
+model RelyingPartyClient {
+  id                String                    @id @db.Uuid
+  externalReference String                    @unique @map("external_reference")
+  committeeId       String?                   @map("committee_id") @db.Uuid
+  policyVersionId   String                    @map("policy_version_id") @db.Uuid
+  state             RelyingPartyClientState   @default(PROPOSED)
+  scopesReference   String                    @map("scopes_reference")
+  scopesDigest      String                    @map("scopes_digest")
+  termsVersion      String                    @map("terms_version")
+  version           Int                       @default(1)
+  createdAt         DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee         Committee?                @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  accessAudits      RelyingPartyAccessAudit[]
+
+  @@index([committeeId, state])
+  @@map("relying_party_client")
+}
+
+model RelyingPartyAccessAudit {
+  sequence         BigInt             @id @default(autoincrement())
+  id               String             @unique @db.Uuid
+  clientId         String             @map("client_id") @db.Uuid
+  subjectReference String             @map("subject_reference")
+  purpose          String
+  result           AuditResult
+  policyVersion    String             @map("policy_version")
+  occurredAt       DateTime           @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  client           RelyingPartyClient @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, occurredAt])
+  @@map("relying_party_access_audit")
+}
+
+model Notification {
+  id                   String             @id @db.Uuid
+  externalReference    String             @unique @map("external_reference")
+  committeeId          String?            @map("committee_id") @db.Uuid
+  participantId        String             @map("participant_id") @db.Uuid
+  policyVersionId      String             @map("policy_version_id") @db.Uuid
+  state                NotificationState  @default(PENDING)
+  channel              ContactChannel
+  destinationReference String             @map("destination_reference")
+  templateVersion      String             @map("template_version")
+  messageType          String             @map("message_type")
+  availableAt          DateTime           @default(now()) @map("available_at") @db.Timestamptz(6)
+  deliveredAt          DateTime?          @map("delivered_at") @db.Timestamptz(6)
+  version              Int                @default(1)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee            Committee?         @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant          ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@index([state, availableAt])
+  @@index([committeeId, createdAt])
+  @@map("notification")
+}
+
+model ProtocolRelease {
+  id                 String               @id @db.Uuid
+  externalReference  String               @unique @map("external_reference")
+  version            String               @unique
+  state              ProtocolReleaseState @default(DRAFT)
+  softwareVersion    String               @map("software_version")
+  policyBundleDigest String               @map("policy_bundle_digest")
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  effectiveAt        DateTime?            @map("effective_at") @db.Timestamptz(6)
+  capabilities       CapabilityStatus[]
+
+  @@map("protocol_release")
+}
+
+model CapabilityStatus {
+  id                String          @id @db.Uuid
+  protocolReleaseId String          @map("protocol_release_id") @db.Uuid
+  capabilityKey     String          @map("capability_key")
+  state             CapabilityState @default(DISABLED)
+  network           VerusNetwork?
+  reasonCategory    String          @map("reason_category")
+  release           ProtocolRelease @relation(fields: [protocolReleaseId], references: [id], onDelete: Restrict)
+
+  @@unique([protocolReleaseId, capabilityKey])
+  @@map("capability_status")
+}
+
+model AnchorRecord {
+  id                String       @id @db.Uuid
+  externalReference String       @unique @map("external_reference")
+  committeeId       String?      @map("committee_id") @db.Uuid
+  outboxEventId     String       @unique @map("outbox_event_id") @db.Uuid
+  network           VerusNetwork @default(VRSCTEST)
+  chainId           String       @map("chain_id")
+  anchorType        String       @map("anchor_type")
+  subjectReference  String       @map("subject_reference")
+  vdxfKey           String       @map("vdxf_key")
+  manifestDigest    String       @map("manifest_digest")
+  state             AnchorState  @default(PENDING)
+  transactionId     String?      @map("transaction_id")
+  blockHeight       BigInt?      @map("block_height")
+  blockHash         String?      @map("block_hash")
+  readbackDigest    String?      @map("readback_digest")
+  version           Int          @default(1)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  committee         Committee?   @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+
+  @@unique([network, anchorType, subjectReference, vdxfKey, manifestDigest])
+  @@index([committeeId, state])
+  @@map("anchor_record")
+}

@@ -8,12 +8,12 @@ import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
-import { AppModule } from "./app.module";
+import { AppModule } from "./app.module.js";
 import {
   checkRuntimeDependencies,
   type DependencyChecker,
   type ReadinessReport,
-} from "./readiness";
+} from "./readiness.js";
 
 export interface ApiAppOptions {
   readonly config?: RuntimeConfig;

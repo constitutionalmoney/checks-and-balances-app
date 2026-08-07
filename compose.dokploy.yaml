@@ -69,14 +69,15 @@ services:
       args:
         CBC_APP: api
     restart: "no"
+    working_dir: /workspace/packages/db
     command:
       [
         "node",
-        "packages/db/node_modules/prisma/build/index.js",
+        "node_modules/prisma/build/index.js",
         "migrate",
         "deploy",
         "--schema",
-        "packages/db/prisma/schema.prisma",
+        "prisma/schema.prisma",
       ]
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set the PostgreSQL connection URL in Dokploy}

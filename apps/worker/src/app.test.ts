@@ -1,7 +1,7 @@
 import { loadRuntimeConfig } from "@cbc/config";
 import { describe, expect, it } from "vitest";
 
-import { createWorkerServer } from "./app";
+import { createWorkerServer } from "./app.js";
 
 describe("worker foundation shell", () => {
   it("exposes liveness and readiness without registering protocol jobs", async () => {
