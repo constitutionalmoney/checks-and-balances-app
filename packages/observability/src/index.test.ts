@@ -15,11 +15,23 @@ describe("createLogger", () => {
     });
     const logger = createLogger("test", "info", destination);
 
-    logger.info({ password: "not-a-real-secret", email: "synthetic@example.test" }, "event");
+    logger.info(
+      {
+        password: "not-a-real-secret",
+        email: "synthetic@example.test",
+        sessionToken: "synthetic-session-bearer",
+        auth: { recoveryToken: "synthetic-recovery-bearer" },
+        req: { headers: { cookie: "synthetic-cookie-bearer" } },
+      },
+      "event",
+    );
 
     await new Promise<void>((resolve) => destination.end(resolve));
     expect(output).toContain("[REDACTED]");
     expect(output).not.toContain("not-a-real-secret");
     expect(output).not.toContain("synthetic@example.test");
+    expect(output).not.toContain("synthetic-session-bearer");
+    expect(output).not.toContain("synthetic-recovery-bearer");
+    expect(output).not.toContain("synthetic-cookie-bearer");
   });
 });

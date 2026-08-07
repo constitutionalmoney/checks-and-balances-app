@@ -15,6 +15,8 @@ This repository is the implementation home for the **Checks & Balances Protocol*
 - Every attestation is intended to expire after **45 days**.
 - Random peer renewal, duplicate prevention, locality rules, signature thresholds, appeals, recovery, evidence retention, and legal documents remain subject to specification and review.
 - No planned feature may be described as operational until its release gate has passed.
+- The issue #17 authentication/authorization core is implemented for synthetic development only;
+  no participant or committee sign-in interface or public authentication endpoint is live.
 
 The website, repository documentation, deployed application, and public API status must tell the same story. Where historical or archived material conflicts with the current protocol documentation, the current protocol documentation controls.
 
@@ -135,9 +137,9 @@ apps/
   worker/            Verus, notifications, expiry, cycle, and outbox jobs
   docs/              Developer documentation site
 packages/
-  domain/             Reserved domain boundary; no business logic in WP-01
-  db/                 Model-free Prisma foundation and readiness checks
-  auth/               Distinct session-audience boundary only
+  domain/             Explicit policy-neutral lifecycle commands
+  db/                 PostgreSQL domain, audit, outbox, and auth repositories
+  auth/               Passkeys, sessions, recovery, authorization, and consent policy core
   verus/              Readiness-only fake/private RPC boundary; no writes
   contracts/          Health/status OpenAPI and shared release status
   ui/                 Shared accessible shell and status banner

@@ -252,6 +252,8 @@ Exact periods require legal and operational review. The engineering system must 
 
 | Record | Proposed baseline | Trigger | Disposal |
 |---|---|---|---|
+| Auth session/challenge | Short security lifetime configured by policy | Expiry, revocation, or consumption | Delete/minimize after the approved security-audit window; store keyed digests, never bearer values |
+| Email contact lookup | While fallback/recovery is enabled | Confirmed change, disablement, or closure | Remove blind index and opaque delivery reference under approved account policy |
 | Failed/expired wallet challenge payload | Hours to limited days | Terminal challenge | Delete payload; retain minimal security audit as approved |
 | Active account/contact | While account active and needed | Closure/inactivity | Delete or de-identify subject to obligations |
 | Passkey credential metadata | While credential active | Removal/account closure | Delete after security retention window |

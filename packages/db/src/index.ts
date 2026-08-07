@@ -4,6 +4,14 @@ import { Client } from "pg";
 export { Pool } from "pg";
 
 export {
+  AuthRepository,
+  type CommitteeInvitationInput,
+  type CommitteePrincipalSnapshot,
+  type CreateAuthAccountInput,
+  type RegisterVerifiedEmailInput,
+} from "./auth-repository.js";
+
+export {
   AttestationRepository,
   type AttestationRecord,
   type IssueAttestationInput,

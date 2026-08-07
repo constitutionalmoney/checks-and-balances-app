@@ -34,6 +34,15 @@ const schema = z.object({
   REDIS_URL: z.string().min(1).startsWith("redis://"),
   CBC_PARTICIPANT_SESSION_AUDIENCE: z.string().min(1),
   CBC_COMMITTEE_SESSION_AUDIENCE: z.string().min(1),
+  CBC_PARTICIPANT_ORIGIN: z.string().url(),
+  CBC_COMMITTEE_ORIGIN: z.string().url(),
+  CBC_PARTICIPANT_RELYING_PARTY_ID: z.string().min(1),
+  CBC_COMMITTEE_RELYING_PARTY_ID: z.string().min(1),
+  CBC_PARTICIPANT_AUTH_SECRET: z.string().min(32),
+  CBC_COMMITTEE_AUTH_SECRET: z.string().min(32),
+  CBC_RATE_LIMIT_SECRET: z.string().min(32),
+  CBC_PARTICIPANT_SESSION_KEY_VERSION: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,31}$/),
+  CBC_COMMITTEE_SESSION_KEY_VERSION: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,31}$/),
   CBC_LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]),
   CBC_SERVICE_PORT: z.coerce.number().int().min(1).max(65_535).optional(),
   CBC_PUBLIC_DIRECTORY_ENABLED: disabledFeature,
@@ -62,6 +71,15 @@ const LOCAL_DEFAULTS = {
   REDIS_URL: "redis://127.0.0.1:56379",
   CBC_PARTICIPANT_SESSION_AUDIENCE: "cbc-participant-app",
   CBC_COMMITTEE_SESSION_AUDIENCE: "cbc-committee-console",
+  CBC_PARTICIPANT_ORIGIN: "http://localhost:3100",
+  CBC_COMMITTEE_ORIGIN: "http://localhost:3101",
+  CBC_PARTICIPANT_RELYING_PARTY_ID: "localhost",
+  CBC_COMMITTEE_RELYING_PARTY_ID: "localhost",
+  CBC_PARTICIPANT_AUTH_SECRET: "local-only-participant-auth-secret-change-me",
+  CBC_COMMITTEE_AUTH_SECRET: "local-only-committee-auth-secret-change-me-now",
+  CBC_RATE_LIMIT_SECRET: "local-only-rate-limit-secret-change-me-now",
+  CBC_PARTICIPANT_SESSION_KEY_VERSION: "local-p-v1",
+  CBC_COMMITTEE_SESSION_KEY_VERSION: "local-c-v1",
   CBC_LOG_LEVEL: "info",
 } as const;
 
@@ -130,6 +148,42 @@ export function loadRuntimeConfig(input: EnvironmentInput = process.env): Runtim
     throw new Error(
       "Invalid runtime configuration: participant and committee session audiences must be distinct",
     );
+  }
+  if (
+    config.CBC_PARTICIPANT_AUTH_SECRET === config.CBC_COMMITTEE_AUTH_SECRET ||
+    config.CBC_PARTICIPANT_ORIGIN === config.CBC_COMMITTEE_ORIGIN ||
+    config.CBC_PARTICIPANT_SESSION_KEY_VERSION === config.CBC_COMMITTEE_SESSION_KEY_VERSION
+  ) {
+    throw new Error(
+      "Invalid runtime configuration: participant and committee authentication trust must be distinct",
+    );
+  }
+
+  if (environment === "testnet" || environment === "pilot") {
+    if (
+      [
+        config.CBC_PARTICIPANT_AUTH_SECRET,
+        config.CBC_COMMITTEE_AUTH_SECRET,
+        config.CBC_RATE_LIMIT_SECRET,
+      ].some((value) => value.startsWith("local-only-"))
+    ) {
+      throw new Error(
+        "Invalid runtime configuration: deployed authentication secrets must be supplied explicitly",
+      );
+    }
+    for (const [field, value] of [
+      ["CBC_PARTICIPANT_ORIGIN", config.CBC_PARTICIPANT_ORIGIN],
+      ["CBC_COMMITTEE_ORIGIN", config.CBC_COMMITTEE_ORIGIN],
+    ] as const) {
+      if (new URL(value).protocol !== "https:") {
+        throw new Error(`Invalid runtime configuration: ${field} must use HTTPS outside local/CI`);
+      }
+    }
+    if (config.CBC_PARTICIPANT_RELYING_PARTY_ID === config.CBC_COMMITTEE_RELYING_PARTY_ID) {
+      throw new Error(
+        "Invalid runtime configuration: deployed participant and committee relying-party IDs must be distinct",
+      );
+    }
   }
 
   if (
