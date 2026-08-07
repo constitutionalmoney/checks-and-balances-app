@@ -20,6 +20,15 @@ x-runtime-environment: &runtime-environment
   REDIS_URL: redis://redis:6379
   CBC_PARTICIPANT_SESSION_AUDIENCE: cbc-participant-app
   CBC_COMMITTEE_SESSION_AUDIENCE: cbc-committee-console
+  CBC_PARTICIPANT_ORIGIN: ${CBC_PARTICIPANT_ORIGIN:?Set the HTTPS participant origin in Dokploy}
+  CBC_COMMITTEE_ORIGIN: ${CBC_COMMITTEE_ORIGIN:?Set the distinct HTTPS committee origin in Dokploy}
+  CBC_PARTICIPANT_RELYING_PARTY_ID: ${CBC_PARTICIPANT_RELYING_PARTY_ID:?Set the participant WebAuthn RP ID in Dokploy}
+  CBC_COMMITTEE_RELYING_PARTY_ID: ${CBC_COMMITTEE_RELYING_PARTY_ID:?Set the distinct committee WebAuthn RP ID in Dokploy}
+  CBC_PARTICIPANT_AUTH_SECRET: ${CBC_PARTICIPANT_AUTH_SECRET:?Set the participant auth secret in Dokploy}
+  CBC_COMMITTEE_AUTH_SECRET: ${CBC_COMMITTEE_AUTH_SECRET:?Set the distinct committee auth secret in Dokploy}
+  CBC_RATE_LIMIT_SECRET: ${CBC_RATE_LIMIT_SECRET:?Set the auth rate-limit secret in Dokploy}
+  CBC_PARTICIPANT_SESSION_KEY_VERSION: ${CBC_PARTICIPANT_SESSION_KEY_VERSION:-p-v1}
+  CBC_COMMITTEE_SESSION_KEY_VERSION: ${CBC_COMMITTEE_SESSION_KEY_VERSION:-c-v1}
   CBC_LOG_LEVEL: ${CBC_LOG_LEVEL:-info}
   CBC_PUBLIC_DIRECTORY_ENABLED: "false"
   CBC_PUBLIC_SESSIONS_ENABLED: "false"

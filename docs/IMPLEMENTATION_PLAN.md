@@ -317,6 +317,14 @@ Implement versioned consent receipts for:
 
 Security review confirms participant compromise cannot create committee authority and committee roles cannot bypass domain rules.
 
+### Implementation evidence (issue #17)
+
+The framework-independent service core and PostgreSQL adapter now implement synthetic passkey/email
+authentication, separate revocable sessions, recovery, durable rate limits, invitation approval,
+role/tenant/conflict checks, privileged re-authentication/four-eyes rules, and versioned consent.
+Public endpoints and participant/committee user interfaces remain later vertical slices. Real use
+remains blocked on issue #12, and Verus-link recovery interaction remains issue #19.
+
 ## 10. WP-05 — Verus RPC spine and VRSCTEST identities
 
 ### Environment

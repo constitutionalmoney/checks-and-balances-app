@@ -510,6 +510,11 @@ Suggested role capabilities:
 
 Roles do not replace policy conditions. A user with a role still needs the correct committee, session, conflict status, authentication strength, and state transition.
 
+Issue #17 implements this matrix as a framework-independent deny-by-default decision. PostgreSQL
+loads only active account/access/member/role state inside the requested committee tenant and marks
+unresolved target conflicts. Session, challenge, recovery, rate-limit, passkey, and consent records
+retain opaque references/digests; controllers must not reconstruct authorization from client claims.
+
 ## 13. Deployment environments
 
 | Environment | Network | Data | Public assurance |
@@ -570,10 +575,10 @@ Before or during implementation, create ADRs for:
 
 ## 17. Architecture definition of done
 
-- [ ] Trust boundaries are represented in deployment configuration and tests.
+- [x] Trust boundaries are represented in deployment configuration and tests.
 - [ ] Domain transitions cannot be bypassed through controllers, scripts, or jobs.
 - [ ] Public serializers use explicit allowlists.
-- [ ] Participant and committee authentication audiences are separate.
+- [x] Participant and committee authentication audiences are separate.
 - [ ] Every privileged action is authorized and audited.
 - [ ] PostgreSQL state, audit event, and outbox event commit atomically.
 - [ ] Verus writes are private-network, VRSCTEST-gated, idempotent, and read back.

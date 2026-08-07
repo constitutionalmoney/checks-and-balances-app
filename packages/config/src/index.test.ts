@@ -8,6 +8,13 @@ const testnetConfig = {
   CBC_VERUS_RPC_URL: "http://verus-rpc.internal:27486",
   CBC_VERUS_RPC_USER: "synthetic-user",
   CBC_VERUS_RPC_PASSWORD: "synthetic-password",
+  CBC_PARTICIPANT_ORIGIN: "https://app.synthetic.invalid",
+  CBC_COMMITTEE_ORIGIN: "https://committee.synthetic.invalid",
+  CBC_PARTICIPANT_RELYING_PARTY_ID: "app.synthetic.invalid",
+  CBC_COMMITTEE_RELYING_PARTY_ID: "committee.synthetic.invalid",
+  CBC_PARTICIPANT_AUTH_SECRET: "testnet-participant-auth-secret-long-enough",
+  CBC_COMMITTEE_AUTH_SECRET: "testnet-committee-auth-secret-long-enough",
+  CBC_RATE_LIMIT_SECRET: "testnet-rate-limit-secret-long-enough",
 } as const;
 
 describe("loadRuntimeConfig", () => {
@@ -70,5 +77,26 @@ describe("loadRuntimeConfig", () => {
         CBC_COMMITTEE_SESSION_AUDIENCE: "same-audience",
       }),
     ).toThrow(/must be distinct/);
+  });
+
+  it("keeps authentication secrets, origins, key versions, and deployed RP IDs distinct", () => {
+    expect(() =>
+      loadRuntimeConfig({
+        CBC_PARTICIPANT_AUTH_SECRET: "same-auth-secret-that-is-long-enough-for-both",
+        CBC_COMMITTEE_AUTH_SECRET: "same-auth-secret-that-is-long-enough-for-both",
+      }),
+    ).toThrow(/authentication trust must be distinct/);
+    expect(() =>
+      loadRuntimeConfig({
+        ...testnetConfig,
+        CBC_COMMITTEE_RELYING_PARTY_ID: "app.synthetic.invalid",
+      }),
+    ).toThrow(/relying-party IDs must be distinct/);
+    expect(() =>
+      loadRuntimeConfig({
+        ...testnetConfig,
+        CBC_COMMITTEE_ORIGIN: "http://committee.synthetic.invalid",
+      }),
+    ).toThrow(/must use HTTPS/);
   });
 });

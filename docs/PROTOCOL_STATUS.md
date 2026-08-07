@@ -2,7 +2,7 @@
 title: Checks & Balances Protocol Status Matrix
 version: 1.0
 status: Proposed
-last_updated: 2026-08-05
+last_updated: 2026-08-06
 ---
 
 # Protocol Status Matrix
@@ -55,7 +55,7 @@ This document is the repository’s public truth table for what is **fixed**, **
 | Civic intent / political view | `out_of_scope` | Verification does not prove agreement, truth, support, opposition, or consensus. | No political field in verification record. |
 | Public directory | `planned` | Directory is not live. | Show empty/pilot-preparation state until committees pass recognition gates. |
 | Participant account | `planned` | Application account flow is not live. | Build on test/staging with synthetic users first. |
-| Passkey/email authentication | `recommended` | Technical implementation choice, not a protocol claim. | Implement as application authentication. |
+| Passkey/email authentication | `recommended` | Technical implementation choice, not a protocol claim. | Synthetic core/repository implemented; public endpoints and user interfaces are not live. |
 | VerusID linking | `planned` | Participant-controlled identity integration is planned. | Optional, VRSCTEST-only until approved. |
 | Verus Mobile authentication | `planned` | Signed wallet request/response flow is planned. | Compatibility spike and replay-safe implementation required. |
 | Participant identity update | `planned_optional` | An opt-in public proof reference may be added only with explicit wallet approval. | Feature flag off by default; never required for baseline status. |

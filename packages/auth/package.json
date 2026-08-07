@@ -2,12 +2,17 @@
   "name": "@cbc/auth",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "Authentication boundary shell with distinct application audiences",
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --exclude dist/**"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "13.3.2"
   }
 }

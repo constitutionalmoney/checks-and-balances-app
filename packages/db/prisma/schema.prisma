@@ -323,6 +323,77 @@ enum AnchorState {
   @@map("anchor_state")
 }
 
+enum AuthTrustDomain {
+  PARTICIPANT @map("participant")
+  COMMITTEE   @map("committee")
+
+  @@map("auth_trust_domain")
+}
+
+enum AuthAccountState {
+  INVITED   @map("invited")
+  ACTIVE    @map("active")
+  LOCKED    @map("locked")
+  SUSPENDED @map("suspended")
+  CLOSED    @map("closed")
+
+  @@map("auth_account_state")
+}
+
+enum AuthenticationStrength {
+  VERIFIED_EMAIL @map("verified_email")
+  PASSKEY        @map("passkey")
+  RECOVERY       @map("recovery")
+
+  @@map("authentication_strength")
+}
+
+enum AuthSessionState {
+  ACTIVE  @map("active")
+  REVOKED @map("revoked")
+  EXPIRED @map("expired")
+
+  @@map("auth_session_state")
+}
+
+enum AuthChallengeKind {
+  PASSKEY_REGISTRATION   @map("passkey_registration")
+  PASSKEY_AUTHENTICATION @map("passkey_authentication")
+  EMAIL_SIGN_IN          @map("email_sign_in")
+  ACCOUNT_RECOVERY       @map("account_recovery")
+  RECOVERY_GRANT         @map("recovery_grant")
+  EMAIL_CHANGE           @map("email_change")
+
+  @@map("auth_challenge_kind")
+}
+
+enum AuthChallengeState {
+  PENDING  @map("pending")
+  CONSUMED @map("consumed")
+  EXPIRED  @map("expired")
+  REJECTED @map("rejected")
+
+  @@map("auth_challenge_state")
+}
+
+enum CommitteeAccessState {
+  INVITED   @map("invited")
+  APPROVED  @map("approved")
+  ACTIVE    @map("active")
+  SUSPENDED @map("suspended")
+  REVOKED   @map("revoked")
+
+  @@map("committee_access_state")
+}
+
+enum ConsentAction {
+  ACCEPTED  @map("accepted")
+  DECLINED  @map("declined")
+  WITHDRAWN @map("withdrawn")
+
+  @@map("consent_action")
+}
+
 model Jurisdiction {
   id                String      @id @db.Uuid
   externalReference String      @unique @map("external_reference")
@@ -336,16 +407,16 @@ model Jurisdiction {
 }
 
 model Committee {
-  id                   String                   @id @db.Uuid
-  externalReference    String                   @unique @map("external_reference")
-  slug                 String                   @unique
-  displayName          String                   @map("display_name")
-  state                CommitteeState           @default(PROPOSED)
-  jurisdictionId       String                   @map("jurisdiction_id") @db.Uuid
-  version              Int                      @default(1)
-  createdAt            DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(6)
-  jurisdiction         Jurisdiction             @relation(fields: [jurisdictionId], references: [id], onDelete: Restrict)
+  id                   String                      @id @db.Uuid
+  externalReference    String                      @unique @map("external_reference")
+  slug                 String                      @unique
+  displayName          String                      @map("display_name")
+  state                CommitteeState              @default(PROPOSED)
+  jurisdictionId       String                      @map("jurisdiction_id") @db.Uuid
+  version              Int                         @default(1)
+  createdAt            DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  jurisdiction         Jurisdiction                @relation(fields: [jurisdictionId], references: [id], onDelete: Restrict)
   consentReceipts      ConsentReceipt[]
   idempotency          IdempotencyRecord[]
   auditEvents          AuditEvent[]
@@ -367,6 +438,8 @@ model Committee {
   relyingPartyClients  RelyingPartyClient[]
   notifications        Notification[]
   anchorRecords        AnchorRecord[]
+  authAccess           AuthCommitteeAccess[]
+  reviewerAssignments  ReviewerSessionAssignment[]
 
   @@index([jurisdictionId, state])
   @@map("committee")
@@ -392,8 +465,137 @@ model ParticipantAccount {
   privacyRequests      PrivacyRightsRequest[]
   notifications        Notification[]
   correctionRequests   CorrectionRequest[]
+  authAccounts         AuthAccount[]
 
   @@map("participant_account")
+}
+
+model AuthAccount {
+  id                  String                @id @db.Uuid
+  externalReference   String                @unique @map("external_reference")
+  trustDomain         AuthTrustDomain       @map("trust_domain")
+  state               AuthAccountState      @default(INVITED)
+  participantId       String?               @map("participant_id") @db.Uuid
+  version             Int                   @default(1)
+  lockedAt            DateTime?             @map("locked_at") @db.Timestamptz(6)
+  suspendedAt         DateTime?             @map("suspended_at") @db.Timestamptz(6)
+  recoveredAt         DateTime?             @map("recovered_at") @db.Timestamptz(6)
+  closedAt            DateTime?             @map("closed_at") @db.Timestamptz(6)
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  participant         ParticipantAccount?   @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  sessions            AuthSession[]
+  challenges          AuthChallenge[]
+  contactPreferences  ContactPreference[]
+  passkeys            PasskeyMetadata[]
+  consentReceipts     ConsentReceipt[]
+  notifications       Notification[]
+  committeeAccess     AuthCommitteeAccess[]
+  privilegedApprovals PrivilegedApproval[]  @relation("PrivilegedApprover")
+  privilegedRequests  PrivilegedApproval[]  @relation("PrivilegedRequester")
+
+  @@unique([participantId, trustDomain])
+  @@index([trustDomain, state])
+  @@map("auth_account")
+}
+
+model AuthSession {
+  id                     String                 @id @db.Uuid
+  accountId              String                 @map("account_id") @db.Uuid
+  trustDomain            AuthTrustDomain        @map("trust_domain")
+  audience               String
+  tokenDigest            String                 @unique @map("token_digest")
+  csrfDigest             String                 @map("csrf_digest")
+  keyVersion             String                 @map("key_version")
+  authenticationStrength AuthenticationStrength @map("authentication_strength")
+  state                  AuthSessionState       @default(ACTIVE)
+  deviceLabel            String                 @map("device_label")
+  authenticatedAt        DateTime               @map("authenticated_at") @db.Timestamptz(6)
+  reauthenticatedAt      DateTime?              @map("reauthenticated_at") @db.Timestamptz(6)
+  lastSeenAt             DateTime               @map("last_seen_at") @db.Timestamptz(6)
+  idleExpiresAt          DateTime               @map("idle_expires_at") @db.Timestamptz(6)
+  absoluteExpiresAt      DateTime               @map("absolute_expires_at") @db.Timestamptz(6)
+  revokedAt              DateTime?              @map("revoked_at") @db.Timestamptz(6)
+  revocationReason       String?                @map("revocation_reason")
+  createdAt              DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  account                AuthAccount            @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([accountId, state, absoluteExpiresAt])
+  @@index([trustDomain, tokenDigest])
+  @@map("auth_session")
+}
+
+model AuthChallenge {
+  id                   String             @id @db.Uuid
+  accountId            String?            @map("account_id") @db.Uuid
+  trustDomain          AuthTrustDomain    @map("trust_domain")
+  kind                 AuthChallengeKind
+  state                AuthChallengeState @default(PENDING)
+  secretDigest         String             @unique @map("secret_digest")
+  destinationReference String?            @map("destination_reference")
+  lookupDigest         String?            @map("lookup_digest")
+  attemptCount         Int                @default(0) @map("attempt_count")
+  maximumAttempts      Int                @default(1) @map("maximum_attempts")
+  expiresAt            DateTime           @map("expires_at") @db.Timestamptz(6)
+  consumedAt           DateTime?          @map("consumed_at") @db.Timestamptz(6)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  account              AuthAccount?       @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([trustDomain, kind, state, expiresAt])
+  @@index([accountId, kind, state])
+  @@map("auth_challenge")
+}
+
+model AuthRateLimitBucket {
+  keyDigest       String   @id @map("key_digest")
+  bucket          String
+  attemptCount    Int      @default(1) @map("attempt_count")
+  windowStartedAt DateTime @map("window_started_at") @db.Timestamptz(6)
+  expiresAt       DateTime @map("expires_at") @db.Timestamptz(6)
+
+  @@index([expiresAt])
+  @@map("auth_rate_limit_bucket")
+}
+
+model AuthCommitteeAccess {
+  id                  String               @id @db.Uuid
+  accountId           String               @map("account_id") @db.Uuid
+  committeeId         String               @map("committee_id") @db.Uuid
+  memberId            String?              @map("member_id") @db.Uuid
+  state               CommitteeAccessState @default(INVITED)
+  invitedByReference  String               @map("invited_by_reference")
+  approvedByReference String?              @map("approved_by_reference")
+  invitedAt           DateTime             @map("invited_at") @db.Timestamptz(6)
+  approvedAt          DateTime?            @map("approved_at") @db.Timestamptz(6)
+  activatedAt         DateTime?            @map("activated_at") @db.Timestamptz(6)
+  suspendedAt         DateTime?            @map("suspended_at") @db.Timestamptz(6)
+  revokedAt           DateTime?            @map("revoked_at") @db.Timestamptz(6)
+  account             AuthAccount          @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  committee           Committee            @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  member              CommitteeMember?     @relation(fields: [memberId, committeeId], references: [id, committeeId], onDelete: Restrict)
+
+  @@unique([accountId, committeeId])
+  @@index([committeeId, state])
+  @@map("auth_committee_access")
+}
+
+model PrivilegedApproval {
+  id                     String      @id @db.Uuid
+  operationReference     String      @map("operation_reference")
+  action                 String
+  targetReference        String      @map("target_reference")
+  requesterAccountId     String      @map("requester_account_id") @db.Uuid
+  approverAccountId      String      @map("approver_account_id") @db.Uuid
+  policyVersionReference String      @map("policy_version_reference")
+  approvedAt             DateTime    @map("approved_at") @db.Timestamptz(6)
+  expiresAt              DateTime    @map("expires_at") @db.Timestamptz(6)
+  consumedAt             DateTime?   @map("consumed_at") @db.Timestamptz(6)
+  requester              AuthAccount @relation("PrivilegedRequester", fields: [requesterAccountId], references: [id], onDelete: Restrict)
+  approver               AuthAccount @relation("PrivilegedApprover", fields: [approverAccountId], references: [id], onDelete: Restrict)
+
+  @@unique([operationReference, approverAccountId])
+  @@index([operationReference, expiresAt])
+  @@map("privileged_approval")
 }
 
 model PolicyDocument {
@@ -407,17 +609,18 @@ model PolicyDocument {
 }
 
 model PolicyVersion {
-  id               String             @id @db.Uuid
-  policyDocumentId String             @map("policy_document_id") @db.Uuid
-  version          String
-  state            PolicyVersionState @default(DRAFT)
-  contentDigest    String             @map("content_digest")
-  contentReference String?            @map("content_reference")
-  effectiveAt      DateTime?          @map("effective_at") @db.Timestamptz(6)
-  retiredAt        DateTime?          @map("retired_at") @db.Timestamptz(6)
-  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  policyDocument   PolicyDocument     @relation(fields: [policyDocumentId], references: [id], onDelete: Restrict)
-  consentReceipts  ConsentReceipt[]
+  id                  String                      @id @db.Uuid
+  policyDocumentId    String                      @map("policy_document_id") @db.Uuid
+  version             String
+  state               PolicyVersionState          @default(DRAFT)
+  contentDigest       String                      @map("content_digest")
+  contentReference    String?                     @map("content_reference")
+  effectiveAt         DateTime?                   @map("effective_at") @db.Timestamptz(6)
+  retiredAt           DateTime?                   @map("retired_at") @db.Timestamptz(6)
+  createdAt           DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  policyDocument      PolicyDocument              @relation(fields: [policyDocumentId], references: [id], onDelete: Restrict)
+  consentReceipts     ConsentReceipt[]
+  reviewerAssignments ReviewerSessionAssignment[]
 
   @@unique([policyDocumentId, version])
   @@index([state, effectiveAt])
@@ -425,22 +628,29 @@ model PolicyVersion {
 }
 
 model ConsentReceipt {
-  id                String             @id @db.Uuid
-  externalReference String             @unique @map("external_reference")
-  participantId     String             @map("participant_id") @db.Uuid
-  committeeId       String?            @map("committee_id") @db.Uuid
-  policyVersionId   String             @map("policy_version_id") @db.Uuid
-  purpose           String
-  state             ConsentState       @default(ACKNOWLEDGED)
-  version           Int                @default(1)
-  acknowledgedAt    DateTime?          @map("acknowledged_at") @db.Timestamptz(6)
-  withdrawnAt       DateTime?          @map("withdrawn_at") @db.Timestamptz(6)
-  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
-  committee         Committee?         @relation(fields: [committeeId], references: [id], onDelete: Restrict)
-  policyVersion     PolicyVersion      @relation(fields: [policyVersionId], references: [id], onDelete: Restrict)
+  id                    String              @id @db.Uuid
+  externalReference     String              @unique @map("external_reference")
+  participantId         String?             @map("participant_id") @db.Uuid
+  authAccountId         String              @map("auth_account_id") @db.Uuid
+  committeeId           String?             @map("committee_id") @db.Uuid
+  policyVersionId       String              @map("policy_version_id") @db.Uuid
+  purpose               String
+  presentationReference String              @map("presentation_reference")
+  presentationDigest    String              @map("presentation_digest")
+  action                ConsentAction
+  state                 ConsentState        @default(ACKNOWLEDGED)
+  version               Int                 @default(1)
+  acknowledgedAt        DateTime?           @map("acknowledged_at") @db.Timestamptz(6)
+  presentedAt           DateTime            @map("presented_at") @db.Timestamptz(6)
+  actedAt               DateTime            @map("acted_at") @db.Timestamptz(6)
+  withdrawnAt           DateTime?           @map("withdrawn_at") @db.Timestamptz(6)
+  createdAt             DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  participant           ParticipantAccount? @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  authAccount           AuthAccount         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
+  committee             Committee?          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  policyVersion         PolicyVersion       @relation(fields: [policyVersionId], references: [id], onDelete: Restrict)
 
-  @@unique([participantId, policyVersionId, purpose])
+  @@unique([authAccountId, policyVersionId, purpose, action], map: "consent_receipt_account_policy_purpose_action_key")
   @@index([committeeId, acknowledgedAt])
   @@map("consent_receipt")
 }
@@ -580,19 +790,21 @@ model VerusJob {
 }
 
 model CommitteeMember {
-  id                String                @id @db.Uuid
-  externalReference String                @unique @map("external_reference")
-  committeeId       String                @map("committee_id") @db.Uuid
-  participantId     String?               @map("participant_id") @db.Uuid
-  actorReference    String                @map("actor_reference")
-  state             MembershipState       @default(PROPOSED)
-  version           Int                   @default(1)
-  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
-  committee         Committee             @relation(fields: [committeeId], references: [id], onDelete: Restrict)
-  participant       ParticipantAccount?   @relation(fields: [participantId], references: [id], onDelete: Restrict)
-  roles             CommitteeMemberRole[]
-  conflicts         ConflictDeclaration[]
+  id                 String                      @id @db.Uuid
+  externalReference  String                      @unique @map("external_reference")
+  committeeId        String                      @map("committee_id") @db.Uuid
+  participantId      String?                     @map("participant_id") @db.Uuid
+  actorReference     String                      @map("actor_reference")
+  state              MembershipState             @default(PROPOSED)
+  version            Int                         @default(1)
+  createdAt          DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  committee          Committee                   @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant        ParticipantAccount?         @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  roles              CommitteeMemberRole[]
+  conflicts          ConflictDeclaration[]
+  authAccess         AuthCommitteeAccess[]
+  sessionAssignments ReviewerSessionAssignment[]
 
   @@unique([id, committeeId])
   @@unique([committeeId, actorReference])
@@ -666,29 +878,40 @@ model ReadinessChecklistItem {
 }
 
 model ContactPreference {
-  id                   String             @id @db.Uuid
-  participantId        String             @map("participant_id") @db.Uuid
+  id                   String              @id @db.Uuid
+  participantId        String?             @map("participant_id") @db.Uuid
+  authAccountId        String              @map("auth_account_id") @db.Uuid
   channel              ContactChannel
-  destinationReference String             @map("destination_reference")
-  verifiedAt           DateTime?          @map("verified_at") @db.Timestamptz(6)
-  disabledAt           DateTime?          @map("disabled_at") @db.Timestamptz(6)
-  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  participant          ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  destinationReference String              @map("destination_reference")
+  lookupDigest         String              @unique @map("lookup_digest")
+  verifiedAt           DateTime?           @map("verified_at") @db.Timestamptz(6)
+  disabledAt           DateTime?           @map("disabled_at") @db.Timestamptz(6)
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  participant          ParticipantAccount? @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  authAccount          AuthAccount         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
 
   @@unique([participantId, channel, destinationReference])
   @@map("contact_preference")
 }
 
 model PasskeyMetadata {
-  id                  String             @id @db.Uuid
-  participantId       String             @map("participant_id") @db.Uuid
-  credentialReference String             @unique @map("credential_reference")
-  relyingPartyId      String             @map("relying_party_id")
-  state               CredentialState    @default(ACTIVE)
-  signCount           BigInt             @default(0) @map("sign_count")
-  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  lastUsedAt          DateTime?          @map("last_used_at") @db.Timestamptz(6)
-  participant         ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  id                   String              @id @db.Uuid
+  participantId        String?             @map("participant_id") @db.Uuid
+  authAccountId        String              @map("auth_account_id") @db.Uuid
+  credentialReference  String              @unique @map("credential_reference")
+  relyingPartyId       String              @map("relying_party_id")
+  publicKey            Bytes               @map("public_key")
+  transports           String[]
+  credentialDeviceType String              @map("credential_device_type")
+  backedUp             Boolean             @default(false) @map("backed_up")
+  deviceLabel          String              @map("device_label")
+  state                CredentialState     @default(ACTIVE)
+  signCount            BigInt              @default(0) @map("sign_count")
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt           DateTime?           @map("last_used_at") @db.Timestamptz(6)
+  revokedAt            DateTime?           @map("revoked_at") @db.Timestamptz(6)
+  participant          ParticipantAccount? @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  authAccount          AuthAccount         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
 
   @@index([participantId, state])
   @@map("passkey_metadata")
@@ -750,22 +973,43 @@ model VerificationRequest {
 }
 
 model VerificationSession {
-  id                String       @id @db.Uuid
-  externalReference String       @unique @map("external_reference")
-  committeeId       String       @map("committee_id") @db.Uuid
-  policyVersionId   String       @map("policy_version_id") @db.Uuid
-  state             SessionState @default(DRAFT)
-  startsAt          DateTime     @map("starts_at") @db.Timestamptz(6)
-  endsAt            DateTime     @map("ends_at") @db.Timestamptz(6)
-  locationReference String       @map("location_reference")
-  capacity          Int
-  version           Int          @default(1)
-  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  committee         Committee    @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  id                  String                      @id @db.Uuid
+  externalReference   String                      @unique @map("external_reference")
+  committeeId         String                      @map("committee_id") @db.Uuid
+  policyVersionId     String                      @map("policy_version_id") @db.Uuid
+  state               SessionState                @default(DRAFT)
+  startsAt            DateTime                    @map("starts_at") @db.Timestamptz(6)
+  endsAt              DateTime                    @map("ends_at") @db.Timestamptz(6)
+  locationReference   String                      @map("location_reference")
+  capacity            Int
+  version             Int                         @default(1)
+  createdAt           DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee           Committee                   @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  reviewerAssignments ReviewerSessionAssignment[]
 
   @@unique([id, committeeId])
   @@index([committeeId, startsAt])
   @@map("verification_session")
+}
+
+model ReviewerSessionAssignment {
+  id                  String              @id @db.Uuid
+  committeeId         String              @map("committee_id") @db.Uuid
+  sessionId           String              @map("session_id") @db.Uuid
+  memberId            String              @map("member_id") @db.Uuid
+  policyVersionId     String              @map("policy_version_id") @db.Uuid
+  state               MembershipState     @default(ACTIVE)
+  assignedByReference String              @map("assigned_by_reference")
+  assignedAt          DateTime            @map("assigned_at") @db.Timestamptz(6)
+  revokedAt           DateTime?           @map("revoked_at") @db.Timestamptz(6)
+  committee           Committee           @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  session             VerificationSession @relation(fields: [sessionId, committeeId], references: [id, committeeId], onDelete: Restrict)
+  member              CommitteeMember     @relation(fields: [memberId, committeeId], references: [id, committeeId], onDelete: Restrict)
+  policyVersion       PolicyVersion       @relation(fields: [policyVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, memberId])
+  @@index([committeeId, state])
+  @@map("reviewer_session_assignment")
 }
 
 model Appointment {
@@ -1058,22 +1302,24 @@ model RelyingPartyAccessAudit {
 }
 
 model Notification {
-  id                   String             @id @db.Uuid
-  externalReference    String             @unique @map("external_reference")
-  committeeId          String?            @map("committee_id") @db.Uuid
-  participantId        String             @map("participant_id") @db.Uuid
-  policyVersionId      String             @map("policy_version_id") @db.Uuid
-  state                NotificationState  @default(PENDING)
+  id                   String              @id @db.Uuid
+  externalReference    String              @unique @map("external_reference")
+  committeeId          String?             @map("committee_id") @db.Uuid
+  participantId        String?             @map("participant_id") @db.Uuid
+  authAccountId        String              @map("auth_account_id") @db.Uuid
+  policyVersionId      String              @map("policy_version_id") @db.Uuid
+  state                NotificationState   @default(PENDING)
   channel              ContactChannel
-  destinationReference String             @map("destination_reference")
-  templateVersion      String             @map("template_version")
-  messageType          String             @map("message_type")
-  availableAt          DateTime           @default(now()) @map("available_at") @db.Timestamptz(6)
-  deliveredAt          DateTime?          @map("delivered_at") @db.Timestamptz(6)
-  version              Int                @default(1)
-  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  committee            Committee?         @relation(fields: [committeeId], references: [id], onDelete: Restrict)
-  participant          ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  destinationReference String              @map("destination_reference")
+  templateVersion      String              @map("template_version")
+  messageType          String              @map("message_type")
+  availableAt          DateTime            @default(now()) @map("available_at") @db.Timestamptz(6)
+  deliveredAt          DateTime?           @map("delivered_at") @db.Timestamptz(6)
+  version              Int                 @default(1)
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  committee            Committee?          @relation(fields: [committeeId], references: [id], onDelete: Restrict)
+  participant          ParticipantAccount? @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  authAccount          AuthAccount         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
 
   @@index([state, availableAt])
   @@index([committeeId, createdAt])

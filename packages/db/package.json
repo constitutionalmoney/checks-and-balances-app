@@ -23,6 +23,7 @@
     "db:seed": "tsx src/seed.ts"
   },
   "dependencies": {
+    "@cbc/auth": "workspace:*",
     "@cbc/domain": "workspace:*",
     "@prisma/adapter-pg": "7.9.1",
     "@prisma/client": "7.9.1",

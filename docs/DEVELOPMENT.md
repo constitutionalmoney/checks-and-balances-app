@@ -63,8 +63,16 @@ pnpm db:seed
 
 The database schema contains the issue #16 privacy-minimized domain core. `db:seed` writes no data.
 `test:persistence` creates randomized synthetic records to verify lifecycle, tenancy, expiry,
-idempotency, atomic rollback, audit chaining, and outbox crash recovery; use it only against a
-disposable local/CI database. Compose CI runs it after applying every migration from empty.
+idempotency, atomic rollback, audit chaining, outbox crash recovery, separate auth trust domains,
+single-use challenges, recovery session revocation, invitation approval, passkey inventory, and
+consent versions; use it only against a disposable local/CI database. Compose CI runs it after
+applying every migration from empty.
+
+Issue #17 auth configuration uses distinct participant/committee origins, WebAuthn RP IDs,
+audiences, secrets, cookie names, and key versions. Local/CI may use `localhost`; Dokploy/testnet
+must supply distinct HTTPS hosts and secrets. The auth core is exercised through synthetic tests,
+not exposed as a live account service. See `docs/AUTHENTICATION_ACCESSIBILITY.md` for the interface
+contract that issues #20/#21 must verify.
 
 ## Environment profiles
 

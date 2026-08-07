@@ -78,6 +78,13 @@ jobs:
           CBC_VERUS_RPC_URL: http://verusd.internal:27486
           CBC_VERUS_RPC_USER: ci-only-rpc-user
           CBC_VERUS_RPC_PASSWORD: ci-only-rpc-password
+          CBC_PARTICIPANT_ORIGIN: https://app.synthetic.invalid
+          CBC_COMMITTEE_ORIGIN: https://committee.synthetic.invalid
+          CBC_PARTICIPANT_RELYING_PARTY_ID: app.synthetic.invalid
+          CBC_COMMITTEE_RELYING_PARTY_ID: committee.synthetic.invalid
+          CBC_PARTICIPANT_AUTH_SECRET: ci-only-participant-auth-secret-long-enough
+          CBC_COMMITTEE_AUTH_SECRET: ci-only-committee-auth-secret-long-enough
+          CBC_RATE_LIMIT_SECRET: ci-only-rate-limit-secret-long-enough
         run: docker compose -f compose.dokploy.yaml config --quiet
       - name: Start every local service
         run: docker compose -f infra/docker/compose.yaml up --detach --build --wait --wait-timeout 300
@@ -86,10 +93,11 @@ jobs:
           docker compose -f infra/docker/compose.yaml exec -T postgres
           psql --username cbc --dbname cbc
           < packages/db/prisma/persistence-smoke.sql
-      - name: Execute synthetic lifecycle and crash-recovery verification
+      - name: Execute synthetic lifecycle, auth, and crash-recovery verification
         run: >-
           docker compose -f infra/docker/compose.yaml exec -T api
-          node node_modules/tsx/dist/cli.mjs scripts/verify-domain-persistence.ts
+          sh -c 'node node_modules/tsx/dist/cli.mjs scripts/verify-domain-persistence.ts &&
+          node node_modules/tsx/dist/cli.mjs scripts/verify-auth-persistence.ts'
       - name: Probe shells and readiness routes
         run: |
           curl --fail --silent --show-error http://127.0.0.1:4000/ready | grep --fixed-strings '"ready":true'

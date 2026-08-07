@@ -24,6 +24,7 @@ const ids = {
   committee1: randomUUID(),
   committee2: randomUUID(),
   participant: randomUUID(),
+  authAccount: randomUUID(),
   revocationParticipant: randomUUID(),
   policyDocument: randomUUID(),
   policyVersion: randomUUID(),
@@ -107,6 +108,12 @@ async function seedSyntheticFoundation(): Promise<void> {
       `INSERT INTO "participant_account" ("id","external_reference","updated_at")
        VALUES ($1,$2,CURRENT_TIMESTAMP),($3,$4,CURRENT_TIMESTAMP)`,
       [ids.participant, refs.participant, ids.revocationParticipant, refs.revocationParticipant],
+    );
+    await pool.query(
+      `INSERT INTO "auth_account" (
+        "id","external_reference","trust_domain","state","participant_id","updated_at"
+       ) VALUES ($1,$2,'participant','active',$3,CURRENT_TIMESTAMP)`,
+      [ids.authAccount, `auth_synthetic_${suffix}`, ids.participant],
     );
     await pool.query(
       `INSERT INTO "policy_document" ("id","policy_key","title")
@@ -504,10 +511,21 @@ async function verifySupportingLifecycleRepositories(): Promise<void> {
   const consentReference = `consent_synthetic_${suffix}`;
   await pool.query(
     `INSERT INTO "consent_receipt" (
-      "id","external_reference","participant_id","committee_id","policy_version_id",
-      "purpose","state","acknowledged_at"
-     ) VALUES ($1,$2,$3,$4,$5,'synthetic_lifecycle_test','pending',NULL)`,
-    [randomUUID(), consentReference, ids.participant, ids.committee1, ids.policyVersion],
+      "id","external_reference","participant_id","auth_account_id","committee_id","policy_version_id",
+      "purpose","presentation_reference","presentation_digest","action","state",
+      "acknowledged_at","presented_at","acted_at"
+     ) VALUES ($1,$2,$3,$4,$5,$6,'synthetic_lifecycle_test',$7,$8,'accepted','pending',NULL,$9,$9)`,
+    [
+      randomUUID(),
+      consentReference,
+      ids.participant,
+      ids.authAccount,
+      ids.committee1,
+      ids.policyVersion,
+      `presentation_synthetic_${suffix}`,
+      hash(`presentation-${suffix}`),
+      new Date("2030-01-01T00:00:00.000Z"),
+    ],
   );
   await lifecycles.transitionConsent("acknowledgeConsent", {
     externalReference: consentReference,

@@ -31,6 +31,17 @@ INSERT INTO "participant_account" (
   CURRENT_TIMESTAMP
 );
 
+INSERT INTO "auth_account" (
+  "id", "external_reference", "trust_domain", "state", "participant_id", "updated_at"
+) VALUES (
+  '00000000-0000-4000-8000-000000000030',
+  'auth_participant_synthetic_001',
+  'participant',
+  'active',
+  '00000000-0000-4000-8000-000000000003',
+  CURRENT_TIMESTAMP
+);
+
 INSERT INTO "policy_document" (
   "id", "policy_key", "title"
 ) VALUES (
@@ -50,14 +61,22 @@ INSERT INTO "policy_version" (
 );
 
 INSERT INTO "consent_receipt" (
-  "id", "external_reference", "participant_id", "committee_id", "policy_version_id", "purpose", "acknowledged_at"
+  "id", "external_reference", "participant_id", "auth_account_id", "committee_id",
+  "policy_version_id", "purpose", "presentation_reference", "presentation_digest", "action",
+  "acknowledged_at", "presented_at", "acted_at"
 ) VALUES (
   '00000000-0000-4000-8000-000000000006',
   'consent_synthetic_001',
   '00000000-0000-4000-8000-000000000003',
+  '00000000-0000-4000-8000-000000000030',
   '00000000-0000-4000-8000-000000000002',
   '00000000-0000-4000-8000-000000000005',
   'synthetic_persistence_test',
+  'presentation_synthetic_001',
+  'sha256:synthetic-presentation-digest',
+  'accepted',
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 );
 

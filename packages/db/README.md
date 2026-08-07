@@ -2,12 +2,17 @@
 
 Owner: `@constitutionalmoney`
 
-Canonical PostgreSQL persistence for issue #16, plus PostgreSQL and Redis readiness checks.
+Canonical PostgreSQL persistence for issues #16 and #17, plus PostgreSQL and Redis readiness checks.
 
 The package exposes named verification, attestation, supporting-lifecycle, and leased-outbox
 repositories. Serializable transactions bind domain state, idempotency, append-only audit, and
 opaque outbox intent. Composite foreign keys enforce committee tenancy; immutable validity and a
 database-clock status function enforce the exact 45-day boundary even if a worker is unavailable.
+
+The auth repository adds separate participant/committee accounts, opaque sessions and one-time
+challenges, durable rate limits, passkey/contact inventory, invitation approval, tenant-bound
+reviewer session assignments, recovery/account-lock/email-change audit, and exact consent
+presentation metadata. Raw email values and bearer secrets are not stored.
 
 The schema stores only privacy-minimized metadata. Evidence retention is `not_retained`; outbox
 payloads are opaque references and digests; Verus intent is VRSCTEST-only. No document upload, raw
@@ -22,8 +27,9 @@ pnpm test:persistence
 The verification creates randomized synthetic references only. CI runs it after an empty migration
 and the rolled-back SQL constraint suite. The seed command still writes no records.
 
-Deploy checked-in migrations with `pnpm db:migrate:deploy`. The Issue #16 migration deliberately
-contains PostgreSQL-only tenant foreign keys, transition triggers, append-only guards, and status
-functions that Prisma schema syntax cannot represent. Do not accept a `prisma migrate dev` drift
-proposal that removes those reviewed constraints; generate future migrations in a disposable
-database and review the SQL against this migration before deployment.
+Deploy checked-in migrations with `pnpm db:migrate:deploy`. The issue #16/#17 migrations
+deliberately contain PostgreSQL-only tenant foreign keys, transition triggers, append-only guards,
+auth trust-domain/immutability guards, and status functions that Prisma schema syntax cannot
+represent. Do not accept a `prisma migrate dev` drift proposal that removes those reviewed
+constraints; generate future migrations in a disposable database and review the SQL against these
+migrations before deployment.

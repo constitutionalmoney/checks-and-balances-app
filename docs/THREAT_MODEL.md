@@ -166,6 +166,11 @@ An assumption is not a control. Each requires a test, monitoring, contract, or g
 
 **Controls:** passkey/strong authentication, short privileged sessions, re-authentication, device/session inventory, role/committee scope, optional VerusID proof, rapid revocation, audit, impossible-travel/risk review where proportionate.
 
+**Issue #17 implementation evidence:** separate origins/RP IDs/audiences/keys/cookies, user-verifying
+WebAuthn, opaque revocable sessions, single-use challenges, participant recovery session revocation,
+and committee recovery suspension are covered by synthetic unit and PostgreSQL tests. UI/device and
+pilot operational testing remain open.
+
 ### T04 — Committee collusion or capture
 
 **Attack:** reviewers approve fake appearances, deny targeted participants, manipulate evidence results, or hide conflicts.
