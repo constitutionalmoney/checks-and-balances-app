@@ -73,6 +73,5 @@ export async function createWorkerServer(options: WorkerServerOptions = {}): Pro
     return report;
   });
 
-  await server.ready();
   return { server, config, dependencyChecker };
 }

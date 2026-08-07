@@ -9,11 +9,16 @@ describe("worker foundation shell", () => {
       config: loadRuntimeConfig({ CBC_ENVIRONMENT: "ci" }),
       dependencyChecker: async () => ({ ready: true, dependencies: {} }),
     });
+    let closed = false;
+    server.addHook("onClose", async () => {
+      closed = true;
+    });
 
     const health = await server.inject({ method: "GET", url: "/health" });
     const readiness = await server.inject({ method: "GET", url: "/ready" });
     expect(health.statusCode).toBe(200);
     expect(readiness.json()).toEqual({ ready: true, dependencies: {} });
     await server.close();
+    expect(closed).toBe(true);
   });
 });
