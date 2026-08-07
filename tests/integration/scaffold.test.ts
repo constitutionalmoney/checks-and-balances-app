@@ -58,6 +58,7 @@ describe("WP-01 reproducibility contract", () => {
     ]) {
       expect(compose).toContain(service);
     }
+    expect(compose).toContain("working_dir: /workspace/packages/db");
     expect(compose).not.toMatch(/minio|s3|object.?store/i);
   });
 
@@ -77,6 +78,7 @@ describe("WP-01 reproducibility contract", () => {
       expect(compose).toContain(service);
     }
 
+    expect(compose).toContain("working_dir: /workspace/packages/db");
     expect(compose).toContain("CBC_ENVIRONMENT: testnet");
     expect(compose).toContain("CBC_VERUS_NETWORK: VRSCTEST");
     expect(compose).toContain('CBC_MAINNET_WRITES_ENABLED: "false"');

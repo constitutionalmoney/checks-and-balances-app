@@ -45,14 +45,15 @@ services:
       dockerfile: infra/docker/Dockerfile.app
       args:
         CBC_APP: api
+    working_dir: /workspace/packages/db
     command:
       [
         "node",
-        "packages/db/node_modules/prisma/build/index.js",
+        "node_modules/prisma/build/index.js",
         "migrate",
         "deploy",
         "--schema",
-        "packages/db/prisma/schema.prisma",
+        "prisma/schema.prisma",
       ]
     environment:
       DATABASE_URL: postgresql://cbc:cbc_local_only@postgres:5432/cbc
