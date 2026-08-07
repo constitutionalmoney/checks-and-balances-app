@@ -1,0 +1,11 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// WP-01 intentionally defines no protocol or participant models.
+// Issue #16 owns the first reviewed domain migration.
