@@ -29,7 +29,7 @@ RUN git clone https://github.com/VerusCoin/BitGoJS.git /tmp/bitgojs \
 RUN node - <<'NODE'
 const fs = require('node:fs');
 const securityOverrides = {
-  axios: '1.15.2',
+  axios: '1.19.0',
   'base-x': '3.0.11',
   'brace-expansion': '1.1.18',
   'cipher-base': '1.0.5',
