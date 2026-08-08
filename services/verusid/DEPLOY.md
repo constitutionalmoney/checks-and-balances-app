@@ -14,17 +14,22 @@ port.
 - `VERUSID_AUTH_RPC_URL`, `VERUSID_AUTH_RPC_USER`, and `VERUSID_AUTH_RPC_PASSWORD`: private,
   read-only-capable VRSCTEST RPC access.
 - `SERVICE_SOURCE_REVISION`: full Git commit deployed by Dokploy.
-- `VERUSID_AUTH_IMAGE_DIGEST`: immutable digest of the built/deployed service image.
+- `VERUSID_AUTH_IMAGE_DIGEST`: immutable digest from the successful main-branch
+  `Publish immutable hosted-auth image` job.
 - `VERUSID_AUTH_VERUSD_VERSION`: exact daemon version serving the RPC endpoint.
 
 Do not display environment variables from the container. Do not paste WIFs, JWT secrets, client
 secrets, RPC credentials, raw wallet callbacks, or result tokens into logs or support messages.
 
-## First image digest
+## Immutable image publication
 
-An image digest is only known after an image exists. Build/publish the image from the approved Git
-commit, record its registry digest, set `VERUSID_AUTH_IMAGE_DIGEST` to that `sha256:` value, and
-redeploy the same immutable image. Do not substitute a mutable tag as acceptance evidence.
+After PR approval and merge, the main workflow publishes
+`ghcr.io/constitutionalmoney/checks-and-balances-verusid-auth:<commit>` and scans that exact image
+by digest. Copy the `sha256:` digest from the successful workflow summary into
+`VERUSID_AUTH_IMAGE_DIGEST`; Compose pulls the image with `@sha256:...` and cannot drift to a
+mutable tag. Set `SERVICE_SOURCE_REVISION` to the same full main-branch commit. If the GHCR package
+is private, configure Dokploy's GitHub Container Registry credentials with read-package access.
+Do not deploy an image from a failed or incomplete publication job.
 
 ## DNS and proxy
 
