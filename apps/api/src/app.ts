@@ -14,10 +14,12 @@ import {
   type DependencyChecker,
   type ReadinessReport,
 } from "./readiness.js";
+import { createWalletLinkHttpFacade, type WalletLinkHttpFacade } from "./wallet-link-http.js";
 
 export interface ApiAppOptions {
   readonly config?: RuntimeConfig;
   readonly dependencyChecker?: DependencyChecker;
+  readonly walletLinkFacade?: WalletLinkHttpFacade;
 }
 
 export interface ApiApp {
@@ -29,20 +31,28 @@ export interface ApiApp {
 export async function createApiApp(options: ApiAppOptions = {}): Promise<ApiApp> {
   const config = options.config ?? loadRuntimeConfig(process.env);
   const dependencyChecker = options.dependencyChecker ?? (() => checkRuntimeDependencies(config));
+  const walletLinkFacade = options.walletLinkFacade ?? createWalletLinkHttpFacade(config);
   const logger = createLogger("api", config.CBC_LOG_LEVEL);
+  const adapter = new FastifyAdapter();
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.register(config, dependencyChecker),
-    new FastifyAdapter(),
+    AppModule.register(config, dependencyChecker, walletLinkFacade),
+    adapter,
     { logger: new StructuredApplicationLogger(logger) },
   );
 
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(cors, { origin: false });
   app.enableShutdownHooks();
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook("onClose", async () => walletLinkFacade.close());
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle("Checks & Balances Protocol foundation API")
-    .setDescription("Health and non-operational status shell only.")
+    .setDescription(
+      "Non-operational protocol status plus disabled-by-default VRSCTEST wallet-link contracts.",
+    )
     .setVersion("0.0.0")
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

@@ -59,6 +59,19 @@ export {
   type PersistedVerusJobState,
   type VerusJobRecord,
 } from "./verus-job-repository.js";
+export {
+  VerusLinkRepository,
+  type CompleteWalletLinkChallengeInput,
+  type CompletedWalletLink,
+  type CreateWalletLinkChallengeInput,
+  type ExpiredWalletLinkChallenge,
+  type PersistedIdentityLinkState,
+  type PersistedWalletChallengeState,
+  type VerusLinkTrustDomain,
+  type WalletLinkChallengeRecord,
+  type WalletLinkPollResult,
+  type WalletLinkPurpose,
+} from "./verus-link-repository.js";
 
 export interface DependencyCheck {
   readonly ok: boolean;

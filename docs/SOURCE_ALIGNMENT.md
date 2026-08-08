@@ -371,9 +371,9 @@ browser -> API -> database/outbox -> Verus worker -> private verusd RPC
 
 **Guide direction**
 
-- Use signed GenericRequest/GenericResponse flows for optional VerusID control/authentication.
+- Use the approved hosted LoginConsent flow for optional VerusID control/authentication; keep CBC authorization and identity readback local.
 - Use a separate explicit IdentityUpdateRequest only for participant-approved identity changes.
-- Verify signer, network, nonce, expiry, identity state, callback, transaction, and readback.
+- Verify the hosted-service contract, signer, network, audience, challenge/state binding, expiry, current identity state, and independent readback.
 - Never collect keys or seeds.
 
 **Implemented in**

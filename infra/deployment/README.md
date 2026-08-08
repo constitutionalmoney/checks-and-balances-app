@@ -45,6 +45,22 @@ an ingress route.
 | `CBC_VERUS_RPC_USER`     | VRSCTEST RPC user stored only in Dokploy.                                    |
 | `CBC_VERUS_RPC_PASSWORD` | VRSCTEST RPC password stored only in Dokploy.                                |
 
+The Compose definition also pins the hosted VerusID authentication origin, callback, contract,
+issuer, and `CONSTITUTION` signing identity. The following are conditionally required only after
+issue #19's hosted-service and mobile acceptance gates pass and
+`CBC_VERUS_LINKING_ENABLED` is deliberately changed to `true`:
+
+| Variable                         | Requirement                                                           |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `CBC_VERUS_AUTH_SERVICE_VERSION` | Exact deployed hosted-service version.                                |
+| `CBC_VERUS_AUTH_CLIENT_SECRET`   | CBC-only result-retrieval secret, at least 32 bytes.                  |
+| `CBC_VERUS_AUTH_JWT_SECRET`      | CBC-only JWT verification secret, distinct and at least 32 bytes.     |
+| `CBC_VERUS_LINK_BINDING_SECRET`  | Local challenge-state binding secret, distinct and at least 32 bytes. |
+| `CBC_VERUS_LINK_POLLING_SECRET`  | Local polling-token digest secret, distinct and at least 32 bytes.    |
+
+Do not enable the flag merely because these values exist. The hosted service must first advertise
+the approved contract and authenticated, idempotent result-delivery semantics described in ADR 0007.
+
 `CBC_POSTGRES_DB` and `CBC_POSTGRES_USER` may be overridden; their defaults are both `cbc`.
 `CBC_LOG_LEVEL` defaults to `info`. The Compose definition fixes the environment to `testnet`, the
 network to `VRSCTEST`, and all unfinished/sensitive feature flags to `false` so an environment

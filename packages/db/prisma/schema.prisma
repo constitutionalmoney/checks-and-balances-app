@@ -204,6 +204,7 @@ enum WalletChallengeState {
   RESPONSE_RECEIVED @map("response_received")
   CONSUMED          @map("consumed")
   EXPIRED           @map("expired")
+  CANCELLED         @map("cancelled")
   REJECTED          @map("rejected")
 
   @@map("wallet_challenge_state")
@@ -493,6 +494,8 @@ model AuthAccount {
   committeeAccess     AuthCommitteeAccess[]
   privilegedApprovals PrivilegedApproval[]  @relation("PrivilegedApprover")
   privilegedRequests  PrivilegedApproval[]  @relation("PrivilegedRequester")
+  verusIdentityLinks  VerusIdentityLink[]
+  walletChallenges    WalletChallenge[]
 
   @@unique([participantId, trustDomain])
   @@index([trustDomain, state])
@@ -934,37 +937,68 @@ model PasskeyMetadata {
 }
 
 model VerusIdentityLink {
-  id                String             @id @db.Uuid
-  externalReference String             @unique @map("external_reference")
-  participantId     String             @map("participant_id") @db.Uuid
-  identityAddress   String             @map("identity_address")
-  network           VerusNetwork       @default(VRSCTEST)
-  proofDigest       String             @map("proof_digest")
-  state             IdentityLinkState  @default(ACTIVE)
-  linkedAt          DateTime           @map("linked_at") @db.Timestamptz(6)
-  revalidatedAt     DateTime?          @map("revalidated_at") @db.Timestamptz(6)
-  unlinkedAt        DateTime?          @map("unlinked_at") @db.Timestamptz(6)
-  participant       ParticipantAccount @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  id                          String              @id @db.Uuid
+  externalReference           String              @unique @map("external_reference")
+  authAccountId               String              @map("auth_account_id") @db.Uuid
+  participantId               String?             @map("participant_id") @db.Uuid
+  trustDomain                 AuthTrustDomain     @map("trust_domain")
+  identityAddress             String              @map("identity_address")
+  displayNameSnapshot         String?             @map("display_name_snapshot")
+  network                     VerusNetwork        @default(VRSCTEST)
+  proofMethod                 String              @map("proof_method")
+  proofDigest                 String              @map("proof_digest")
+  requestSignerIdentity       String              @map("request_signer_identity")
+  observedIdentityStatus      String              @map("observed_identity_status")
+  observedIdentityBlockHeight BigInt              @map("observed_identity_block_height")
+  observedIdentityTxid        String              @map("observed_identity_txid")
+  consentedScopes             String[]            @map("consented_scopes")
+  state                       IdentityLinkState   @default(ACTIVE)
+  linkedAt                    DateTime            @map("linked_at") @db.Timestamptz(6)
+  revalidatedAt               DateTime?           @map("revalidated_at") @db.Timestamptz(6)
+  revalidationReason          String?             @map("revalidation_reason")
+  unlinkedAt                  DateTime?           @map("unlinked_at") @db.Timestamptz(6)
+  version                     Int                 @default(1)
+  createdAt                   DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  authAccount                 AuthAccount         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
+  participant                 ParticipantAccount? @relation(fields: [participantId], references: [id], onDelete: Restrict)
 
-  @@unique([participantId, network, identityAddress])
+  @@unique([authAccountId, network, identityAddress])
+  @@index([identityAddress, network, state])
+  @@index([authAccountId, state])
   @@map("verus_identity_link")
 }
 
 model WalletChallenge {
-  id                String               @id @db.Uuid
-  externalReference String               @unique @map("external_reference")
-  participantId     String               @map("participant_id") @db.Uuid
-  state             WalletChallengeState @default(CREATED)
-  network           VerusNetwork         @default(VRSCTEST)
-  nonceHash         String               @unique @map("nonce_hash")
-  audience          String
-  requestDigest     String               @map("request_digest")
-  expiresAt         DateTime             @map("expires_at") @db.Timestamptz(6)
-  consumedAt        DateTime?            @map("consumed_at") @db.Timestamptz(6)
-  version           Int                  @default(1)
-  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
-  participant       ParticipantAccount   @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  id                         String               @id @db.Uuid
+  externalReference          String               @unique @map("external_reference")
+  authAccountId              String?              @map("auth_account_id") @db.Uuid
+  participantId              String?              @map("participant_id") @db.Uuid
+  trustDomain                AuthTrustDomain      @map("trust_domain")
+  state                      WalletChallengeState @default(CREATED)
+  network                    VerusNetwork         @default(VRSCTEST)
+  purpose                    String               @default("legacy_unverified")
+  nonceHash                  String               @unique @map("nonce_hash")
+  requestId                  String?              @unique @map("request_id")
+  requestDigest              String               @map("request_digest")
+  pollingTokenDigest         String?              @unique @map("polling_token_digest")
+  audience                   String
+  callbackUrl                String               @default("https://invalid.local/legacy") @map("callback_url")
+  applicationIdentityAddress String               @default("legacy_unapproved") @map("application_identity_address")
+  consentedScopes            String[]             @default([]) @map("consented_scopes")
+  issuedAt                   DateTime?            @map("issued_at") @db.Timestamptz(6)
+  expiresAt                  DateTime             @map("expires_at") @db.Timestamptz(6)
+  responseDigest             String?              @map("response_digest")
+  linkedIdentityAddress      String?              @map("linked_identity_address")
+  rejectionReason            String?              @map("rejection_reason")
+  consumedAt                 DateTime?            @map("consumed_at") @db.Timestamptz(6)
+  version                    Int                  @default(1)
+  createdAt                  DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                  DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  authAccount                AuthAccount?         @relation(fields: [authAccountId], references: [id], onDelete: Restrict)
+  participant                ParticipantAccount?  @relation(fields: [participantId], references: [id], onDelete: Restrict)
 
+  @@index([authAccountId, state, expiresAt])
   @@index([participantId, state, expiresAt])
   @@map("wallet_challenge")
 }

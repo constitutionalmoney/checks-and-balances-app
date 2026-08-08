@@ -37,10 +37,199 @@
           }
         }
       }
+    },
+    "/api/v1/auth/verus/challenges": {
+      "post": {
+        "operationId": "createVerusLinkChallenge",
+        "summary": "Create an optional one-time VRSCTEST VerusID-link request.",
+        "security": [
+          { "participantSessionCookie": [], "csrfHeader": [] },
+          { "committeeSessionCookie": [], "csrfHeader": [] }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["consent"],
+                "properties": { "consent": { "const": true } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Hosted, signed same-device and QR presentation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": { "const": "no-store" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WalletLinkPresentation" }
+              }
+            }
+          },
+          "401": { "description": "A baseline application session is required." },
+          "403": { "description": "Origin or CSRF validation failed." },
+          "503": {
+            "description": "Optional VRSCTEST linking is disabled or the hosted auth contract is unavailable/incompatible."
+          }
+        }
+      }
+    },
+    "/api/v1/auth/verus/challenges/status": {
+      "get": {
+        "operationId": "getVerusLinkChallengeStatus",
+        "summary": "Poll an account-bound wallet-link challenge.",
+        "security": [{ "participantSessionCookie": [] }, { "committeeSessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "x-cbc-wallet-poll-token",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string", "minLength": 32, "maxLength": 256 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current challenge state.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WalletLinkStatus" }
+              }
+            }
+          },
+          "401": { "description": "A baseline application session is required." },
+          "404": { "description": "The account-bound challenge is unavailable." }
+        }
+      }
+    },
+    "/api/v1/auth/verus/challenges/{challengeReference}": {
+      "delete": {
+        "operationId": "cancelVerusLinkChallenge",
+        "summary": "Cancel an account-bound wallet-link challenge.",
+        "security": [
+          { "participantSessionCookie": [], "csrfHeader": [] },
+          { "committeeSessionCookie": [], "csrfHeader": [] }
+        ],
+        "parameters": [
+          {
+            "name": "challengeReference",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^wallet_challenge_[a-z0-9]+$" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "The pending challenge was cancelled." },
+          "401": { "description": "A baseline application session is required." },
+          "403": { "description": "Origin or CSRF validation failed." },
+          "404": { "description": "The account-bound challenge is unavailable." }
+        }
+      }
+    },
+    "/api/v1/account/verus-links/{linkReference}": {
+      "delete": {
+        "operationId": "unlinkVerusIdentity",
+        "summary": "Unlink a local VerusID association.",
+        "security": [
+          { "participantSessionCookie": [], "csrfHeader": [] },
+          { "committeeSessionCookie": [], "csrfHeader": [] }
+        ],
+        "parameters": [
+          {
+            "name": "linkReference",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^verus_link_[a-z0-9]+$" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "The local association was unlinked." },
+          "401": { "description": "A baseline application session is required." },
+          "403": { "description": "Origin or CSRF validation failed." },
+          "404": { "description": "The account-bound link is unavailable." }
+        }
+      }
     }
   },
   "components": {
+    "securitySchemes": {
+      "participantSessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-cbc-participant",
+        "description": "Participant trust-domain session cookie."
+      },
+      "committeeSessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-cbc-committee",
+        "description": "Committee trust-domain session cookie."
+      },
+      "csrfHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-cbc-csrf-token"
+      }
+    },
     "schemas": {
+      "WalletLinkPresentation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "challengeReference",
+          "network",
+          "requesterIdentity",
+          "purpose",
+          "scopes",
+          "expiresAt",
+          "sameDeviceUrl",
+          "qrPayload",
+          "pollingToken",
+          "operational",
+          "limitations"
+        ],
+        "properties": {
+          "challengeReference": { "type": "string" },
+          "network": { "const": "VRSCTEST" },
+          "requesterIdentity": { "type": "string", "pattern": "^i" },
+          "purpose": { "enum": ["link_verusid", "revalidate_verusid"] },
+          "scopes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": { "const": "verusid:link" }
+          },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "sameDeviceUrl": {
+            "type": "string",
+            "pattern": "^i5jtwbp6zymeay9llnraglgjqgdrffsau4://"
+          },
+          "qrPayload": { "type": "string" },
+          "pollingToken": { "type": "string" },
+          "operational": { "const": false },
+          "limitations": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "WalletLinkStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["challengeReference", "state", "expiresAt"],
+        "properties": {
+          "challengeReference": { "type": "string" },
+          "state": {
+            "enum": ["presented", "consumed", "expired", "cancelled", "rejected"]
+          },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "linkReference": { "type": "string" },
+          "identityAddress": { "type": "string", "pattern": "^i" }
+        }
+      },
       "ProtocolStatus": {
         "type": "object",
         "additionalProperties": false,

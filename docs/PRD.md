@@ -186,7 +186,7 @@ A restricted role that handles access requests, corrections, incidents, appeals,
 | Versioned API | First-party apps and approved relying parties | Account, operations, status, discovery, policy, schema, proof |
 | Developer docs | Developers | OpenAPI, schemas, SDKs, test fixtures, terms, compatibility |
 | Status service | Everyone | Availability and incident communications |
-| Verus worker | Internal | RPC, wallet-request signing support, anchors, readback, reconciliation |
+| Verus worker | Internal | Private RPC, anchors, readback, and reconciliation; it does not sign account-link requests |
 
 The recommended hosts are defined in [SUBDOMAINS.md](./SUBDOMAINS.md).
 
@@ -197,11 +197,11 @@ The recommended hosts are defined in [SUBDOMAINS.md](./SUBDOMAINS.md).
 1. Participant creates an account with a passkey or verified email.
 2. Participant is shown what account data is stored.
 3. Participant chooses whether to link a VerusID.
-4. Server generates a one-time, signed, expiring VRSCTEST wallet request.
+4. CBC requests a one-time, signed, expiring VRSCTEST LoginConsent presentation from the approved hosted authentication service.
 5. Same-device users open Verus Mobile; desktop users scan a QR code.
 6. Verus Mobile displays the requesting application, network, requested identity action, and callback.
 7. Participant selects and approves an identity.
-8. Backend validates nonce, expiry, audience, callback state, network, signer, identity state, and response signature.
+8. The hosted service validates the wallet response; CBC retrieves the result through the authenticated service contract and validates issuer, audience, challenge, state, JTI, expiry, network, signer, and a fresh on-chain identity readback.
 9. Backend stores the identity i-address and proof metadata—not keys.
 10. Participant may unlink the local account association without rewriting chain history.
 
@@ -261,9 +261,9 @@ The recommended hosts are defined in [SUBDOMAINS.md](./SUBDOMAINS.md).
 
 ### 12.2 VerusID linking and permission
 
-- **FR-VLINK-001:** Generate one-time signed GenericRequest-compatible authentication challenges for VRSCTEST.
+- **FR-VLINK-001:** Request one-time signed LoginConsent challenges from the approved hosted VRSCTEST VerusID authentication service.
 - **FR-VLINK-002:** Provide same-device deep-link and desktop QR paths, plus a browser recovery/polling path.
-- **FR-VLINK-003:** Validate challenge nonce, audience, expiry, requested network, callback binding, request signer, response signer, signature, and current identity state.
+- **FR-VLINK-003:** Pin the hosted-service contract, origin, callback, request signer, network, issuer, and audience; bind every result to local state and independently validate the current identity state on VRSCTEST.
 - **FR-VLINK-004:** Prevent replay and reject previously consumed challenges.
 - **FR-VLINK-005:** Record identity i-address, network, proof time, observed identity state, and consented scopes.
 - **FR-VLINK-006:** Never request or receive wallet key material.
@@ -485,7 +485,8 @@ GET  /api/v1/cycle-reports/{reportId}
 POST /api/v1/accounts
 POST /api/v1/auth/passkey/*
 POST /api/v1/auth/verus/challenges
-POST /api/v1/auth/verus/callback
+GET  /api/v1/auth/verus/challenges/status
+DELETE /api/v1/auth/verus/challenges/{challengeReference}
 DELETE /api/v1/account/verus-links/{linkId}
 POST /api/v1/verification-requests
 GET  /api/v1/verification-requests/{requestId}
@@ -577,7 +578,7 @@ Proposed pilot targets, subject to load testing:
 
 - authenticated application reads: p95 under 500 ms excluding third-party calls;
 - public status decision from canonical database: p95 under 400 ms;
-- wallet callback acknowledgement: under 2 seconds before asynchronous reconciliation;
+- hosted wallet callback acknowledgement: under 2 seconds before asynchronous reconciliation;
 - no synchronous wait for chain confirmation in a browser request.
 
 ### Scalability

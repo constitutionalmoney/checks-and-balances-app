@@ -20,7 +20,8 @@ Keep `checksandbalances.services` as the public explanation and protocol-status 
 | `app.checksandbalances.services` | Participant PWA: account, optional VerusID link, session request, status, renewal, appeal | Participant session | Publish only when participant release gate passes |
 | `committee.checksandbalances.services` | Committee formation and operations console | Strong committee/steward session | Keep inaccessible until authorized test users exist |
 | `verify.checksandbalances.services` | Participant-presented public verifier and proof/status display | Usually none; proof/reference required | Publish testnet label first; resist enumeration |
-| `api.checksandbalances.services` | Versioned API, wallet callbacks, participant and committee backend | Route-specific | No direct public RPC; publish OpenAPI only for released routes |
+| `api.checksandbalances.services` | Versioned participant and committee backend, including local wallet-link initiation and polling | Route-specific | No direct public RPC; publish OpenAPI only for released routes |
+| `auth.checksandbalances.services` | CBC-hosted VerusID LoginConsent challenge, wallet callback, and verified-result service | Service-to-service result access; wallet-signed consent callback | Deploy only the pinned `services/verusid` image and contract; pin its origin, signing identity, callback, network, issuer, and audience before enabling CBC linking |
 | `docs.checksandbalances.services` | Developer documentation, OpenAPI, schemas, SDKs, compatibility matrix | Public for approved material | Label unavailable/planned functions accurately |
 | `status.checksandbalances.services` | Independent uptime and incident page | Public | Host separately from primary application infrastructure |
 | `committees.checksandbalances.services` | Public committee directory and path-based committee pages | Public | Directory remains disabled until committees are approved |
@@ -42,7 +43,7 @@ Use names that make non-production status impossible to miss:
 | `app.testnet.checksandbalances.services` | Participant VRSCTEST application |
 | `committee.testnet.checksandbalances.services` | Committee VRSCTEST console |
 | `verify.testnet.checksandbalances.services` | VRSCTEST verifier |
-| `api.testnet.checksandbalances.services` | VRSCTEST API and wallet callbacks |
+| `api.testnet.checksandbalances.services` | VRSCTEST API and local wallet-link initiation/polling |
 | `docs.testnet.checksandbalances.services` | Preview documentation and contracts |
 | `committees.testnet.checksandbalances.services` | Test directory |
 | `status.testnet.checksandbalances.services` | Test-environment status if useful |
@@ -55,9 +56,12 @@ For temporary review deployments, use provider-generated or tightly controlled n
 
 Authenticated `verusd` RPC must remain on localhost or a private network. There is no legitimate reason to expose it as a public subdomain.
 
-### No separate `auth.checksandbalances.services` initially
+### Reuse the existing hosted authentication service
 
-Authentication and Verus Mobile callbacks can live under versioned, narrowly scoped `api` routes. A separate identity-provider origin adds cookie, redirect, key, and incident complexity before it is needed.
+Do not build a duplicate CBC wallet callback or signer. Optional VerusID linking uses the existing
+`https://auth.checksandbalances.services` LoginConsent service. CBC must treat it as a separate trust domain,
+retrieve results through authenticated server-to-server requests, ignore any remote role claim, and keep
+local account authorization and independent VRSCTEST identity readback inside CBC.
 
 ### No separate `evidence.checksandbalances.services`
 
@@ -128,11 +132,15 @@ Do not provide an unrestricted `/identity/{verusId}` route.
 ```text
 https://api.checksandbalances.services/api/v1/...
 https://api.checksandbalances.services/.well-known/jwks.json       # only if signed token design requires it
-https://api.checksandbalances.services/api/v1/auth/verus/callback
+https://api.checksandbalances.services/api/v1/auth/verus/challenges
+https://api.checksandbalances.services/api/v1/auth/verus/challenges/{challengeId}
 https://api.checksandbalances.services/api/v1/protocol/status
 ```
 
-The wallet callback should be a dedicated route with strict body limits, origin/audience/state validation, replay protection, and idempotent response handling.
+The wallet callback is hosted at `https://auth.checksandbalances.services/verusidlogin`, not on the CBC API.
+CBC exposes only authenticated initiation and account-bound polling. The hosted result contract must enforce
+strict size limits, challenge/state/audience/JTI binding, replay protection, and idempotent delivery until
+acknowledgement or expiry.
 
 ### Docs
 
@@ -182,7 +190,10 @@ https://verify.checksandbalances.services
 
 Documentation examples and third-party relying parties do not receive browser CORS access merely because they have API credentials. Add an origin only when the client architecture requires it.
 
-The Verus Mobile callback is not protected by browser CORS. It is protected by the signed envelope, nonce, state, expiry, audience, network, signer, current identity lookup, body limit, rate limit, and one-time challenge consumption.
+The hosted Verus Mobile callback is not protected by browser CORS. It is protected by the wallet signature,
+challenge and expiry checks, network and application-signer pins, and callback limits. CBC separately protects
+result retrieval with a service credential, verifies issuer/audience/challenge/state/JTI claims, performs a fresh
+VRSCTEST identity lookup, and atomically consumes its local challenge.
 
 ## 7. DNS and TLS
 

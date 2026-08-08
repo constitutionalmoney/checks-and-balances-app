@@ -11,6 +11,7 @@ export default tseslint.config(
       "**/dist/**",
       "**/node_modules/**",
       "packages/db/src/generated/**",
+      "services/verusid/vendor/**",
     ],
   },
   eslint.configs.recommended,
@@ -36,6 +37,18 @@ export default tseslint.config(
     files: ["scripts/**/*.{js,mjs,ts}", "packages/db/src/seed.ts"],
     rules: {
       "no-console": "off",
+    },
+  },
+  {
+    files: ["services/verusid/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+  {
+    files: ["services/verusid/__tests__/**/*.js"],
+    languageOptions: {
+      globals: globals.jest,
     },
   },
 );

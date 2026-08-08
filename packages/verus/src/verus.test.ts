@@ -67,6 +67,7 @@ describe("typed Verus RPC contract", () => {
         hash: "d".repeat(64),
         confirmations: 2,
         height: 1_000,
+        time: 1_800_000_000,
         tx: ["b".repeat(64)],
       },
     };

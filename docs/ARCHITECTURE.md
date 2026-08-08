@@ -461,17 +461,20 @@ Pattern C cannot be required for baseline verification and remains disabled unti
 Wallet requests are ephemeral authorization ceremonies, not long-lived login tokens.
 
 ```text
-Browser -> POST /auth/verus/challenges
-API -> create challenge record + signed request envelope
-API -> browser receives deep-link/QR payload and polling token
+Browser -> POST /auth/verus/challenges with CBC session + consent
+API -> create opaque account binding -> hosted VRSCTEST auth service
+Hosted service -> signed LoginConsent presentation
+API -> browser receives exact deep-link/QR plus separate local polling token
 Participant -> reviews request in Verus Mobile
-Verus Mobile -> signed callback/response
-API -> verify state, nonce, expiry, audience, network, signer, signature, identity state
-API -> consume challenge once and create/update identity link
-Browser -> poll or resume to success/failure result
+Verus Mobile -> signed response -> hosted service callback
+API -> authenticated server-side result retrieval; verify token and every local binding
+API -> independent VRSCTEST identity readback; consume local challenge once
+Browser -> authenticated CBC poll returns success/failure state, never hosted token
 ```
 
-The callback endpoint must be public HTTPS, narrowly scoped, rate limited, and safe to call more than once. A response does not bypass application role or committee-policy authorization.
+The hosted callback must be public HTTPS, narrowly scoped, rate limited, and replay safe. CBC has no
+wallet callback endpoint and never trusts the hosted service's role claim. A response does not
+bypass application role or committee-policy authorization.
 
 ## 11. Public status architecture
 
