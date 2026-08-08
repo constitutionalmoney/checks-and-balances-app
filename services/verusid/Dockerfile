@@ -28,6 +28,24 @@ RUN git clone https://github.com/VerusCoin/BitGoJS.git /tmp/bitgojs \
 # Replace every moving Git dependency with the exact checked-out source or commit.
 RUN node - <<'NODE'
 const fs = require('node:fs');
+const securityOverrides = {
+  axios: '1.15.1',
+  'base-x': '3.0.11',
+  'brace-expansion': '1.1.18',
+  'cipher-base': '1.0.5',
+  elliptic: '6.6.1',
+  'form-data': '4.0.6',
+  'ip-address': '10.3.1',
+  secp256k1: '3.8.1',
+  'sha.js': '2.4.12',
+  tar: '7.5.19',
+  'tiny-secp256k1': '1.1.7',
+  undici: '6.27.0',
+};
+function applySecurityOverrides(pkg) {
+  if (pkg.dependencies?.axios) pkg.dependencies.axios = securityOverrides.axios;
+  pkg.overrides = { ...pkg.overrides, ...securityOverrides };
+}
 function update(path, transform) {
   const value = JSON.parse(fs.readFileSync(path, 'utf8'));
   transform(value);
@@ -37,17 +55,23 @@ function update(path, transform) {
   delete value.scripts;
   fs.writeFileSync(path, JSON.stringify(value, null, 2));
 }
+update('/tmp/bitgojs/package.json', pkg => {
+  applySecurityOverrides(pkg);
+});
 update('/tmp/primitives/package.json', pkg => {
   pkg.dependencies.blake2b = `git+https://github.com/VerusCoin/blake2b.git#${process.env.VERUS_BLAKE2B_COMMIT || '578dc12b7b68a3ce76d1e1add1402b28a5890a6b'}`;
+  applySecurityOverrides(pkg);
 });
 update('/tmp/rpc-client/package.json', pkg => {
   pkg.dependencies.blake2b = `git+https://github.com/VerusCoin/blake2b.git#${process.env.VERUS_BLAKE2B_COMMIT || '578dc12b7b68a3ce76d1e1add1402b28a5890a6b'}`;
   pkg.dependencies['verus-typescript-primitives'] = 'file:/tmp/primitives';
+  applySecurityOverrides(pkg);
 });
 update('/tmp/verusid-client/package.json', pkg => {
   pkg.dependencies['@bitgo/utxo-lib'] = 'file:/tmp/bitgojs';
   pkg.dependencies['verus-typescript-primitives'] = 'file:/tmp/primitives';
   pkg.dependencies['verusd-rpc-ts-client'] = 'file:/tmp/rpc-client';
+  applySecurityOverrides(pkg);
 });
 NODE
 
