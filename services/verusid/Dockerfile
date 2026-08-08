@@ -29,7 +29,7 @@ RUN git clone https://github.com/VerusCoin/BitGoJS.git /tmp/bitgojs \
 RUN node - <<'NODE'
 const fs = require('node:fs');
 const securityOverrides = {
-  axios: '1.15.1',
+  axios: '1.15.2',
   'base-x': '3.0.11',
   'brace-expansion': '1.1.18',
   'cipher-base': '1.0.5',
@@ -124,7 +124,16 @@ ENV NODE_ENV=production
 WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+              /usr/local/lib/node_modules/npm \
+              /usr/local/lib/node_modules/corepack \
+    && rm -f /usr/local/bin/npm \
+             /usr/local/bin/npx \
+             /usr/local/bin/corepack \
+             /usr/local/bin/yarn \
+             /usr/local/bin/yarnpkg \
+             /usr/local/bin/pnpm \
+             /usr/local/bin/pnpx
 RUN groupadd --system --gid 10001 verusid \
     && useradd --system --uid 10001 --gid verusid --home-dir /app verusid
 COPY --from=dependencies --chown=verusid:verusid /app/node_modules ./node_modules
