@@ -388,12 +388,12 @@ Implement [VERUS_MOBILE_INTEGRATION.md](./VERUS_MOBILE_INTEGRATION.md):
 
 1. pin versions and licences;
 2. provision app auth identity;
-3. build deterministic GenericRequest adapter;
-4. create challenge store;
-5. create signed short-lived request;
+3. pin and harden the hosted LoginConsent service contract;
+4. create the local account-bound challenge store;
+5. request an exact signed short-lived presentation server-to-server;
 6. render tested same-device and QR options;
-7. implement callback parsing and verification;
-8. validate nonce, expiry, audience, network, request signer, response signer, identity state, and one-time consumption;
+7. verify the authenticated hosted result without exposing it to the browser;
+8. validate opaque state, expiry, audience, network, hosted signer/result, independent identity state, and one-time local consumption;
 9. store minimum identity-link proof;
 10. build browser polling/recovery;
 11. build unlink/revalidation;

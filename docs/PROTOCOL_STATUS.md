@@ -56,8 +56,8 @@ This document is the repository’s public truth table for what is **fixed**, **
 | Public directory | `planned` | Directory is not live. | Show empty/pilot-preparation state until committees pass recognition gates. |
 | Participant account | `planned` | Application account flow is not live. | Build on test/staging with synthetic users first. |
 | Passkey/email authentication | `recommended` | Technical implementation choice, not a protocol claim. | Synthetic core/repository implemented; public endpoints and user interfaces are not live. |
-| VerusID linking | `planned` | Participant-controlled identity integration is planned. | Optional, VRSCTEST-only until approved. |
-| Verus Mobile authentication | `planned` | Signed wallet request/response flow is planned. | Compatibility spike and replay-safe implementation required. |
+| VerusID linking | `implemented_not_released` | Server-side account binding, atomic consumption, unlink, and revalidation are implemented; the dedicated VRSCTEST signer is registered and verified. | Optional and disabled by default; Android/iOS compatibility approval remains required. |
+| Verus Mobile authentication | `compatibility_pending` | CBC uses the hosted VRSCTEST LoginConsent service through a fail-closed client; exact deployed pins/trust contract and current store-client rows remain pending. | Disabled and not operational; no CBC wallet callback or browser-visible hosted token. |
 | Participant identity update | `planned_optional` | An opt-in public proof reference may be added only with explicit wallet approval. | Feature flag off by default; never required for baseline status. |
 | Committee VerusID | `planned` | Committee identity and authority will use Verus. | Provision and rehearse on VRSCTEST with recovery and revocation. |
 | VDXF namespace | `approved_testnet` | `cbc-protocol-test.VRSCTEST@` owns the v1 VRSCTEST namespace; ADR 0006 and deterministic `getvdxfid` fixtures are authoritative. | Use only the fully qualified approved URI/key allowlist; mainnet remains prohibited. |

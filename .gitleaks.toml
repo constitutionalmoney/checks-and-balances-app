@@ -1,0 +1,14 @@
+title = "Checks and Balances secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Public immutable Git commit pins labelled as commits or revisions"
+regexTarget = "match"
+regexes = [
+  '''(?is)\b[A-Z0-9_]*(?:COMMIT|REVISION)\b.{0,80}?\b[0-9a-f]{40}\b''',
+]

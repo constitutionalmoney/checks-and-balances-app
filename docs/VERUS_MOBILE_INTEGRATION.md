@@ -1,8 +1,8 @@
 ---
 title: Verus Mobile Integration Specification
 version: 1.0
-status: Proposed; compatibility testing required
-last_updated: 2026-08-05
+status: Hosted-service integration implemented fail-closed; service and device compatibility pending
+last_updated: 2026-08-07
 target_network: VRSCTEST
 ---
 
@@ -32,29 +32,37 @@ It does not claim that these flows are live or that every proposed request type 
 
 ## 3. Source-compatible approach
 
-Current Verus Mobile source includes generic-request validation paths for authentication requests and identity-update requests, validates signed requests and network compatibility, looks up signer identity state, and provides a user-review path for identity updates. The implementation must use the exact request classes and encodings supported by the pinned versions of:
+Issue #19 account linking uses the existing VRSCTEST `verusid-auth` service at
+`https://auth.checksandbalances.services`. Its source and Dokploy definition live in
+`services/verusid`. That service owns request signing, the wallet HTTPS webhook,
+LoginConsent parsing/signature verification, and hosted result issuance. CBC owns its existing
+account authentication, consent, opaque account binding, persistence, audit, independent current
+identity readback, unlinking, and revalidation. CBC never receives the hosted signing key and never
+trusts a hosted `role` claim.
 
-- Verus Mobile;
-- `verus-typescript-primitives`;
-- `verusid-ts-client`; and
-- the selected Verus daemon/client release.
+The exact request format is the `LoginConsentRequest`/`LoginConsentResponse` combination emitted by
+the pinned hosted release. The exact current Android and iOS store clients, hosted service image,
+`verusid-ts-client`, `verus-typescript-primitives`, and daemon/API inputs must be observed and pinned
+together before enabling. Do not infer compatibility from an older SDK image or a side-loaded APK,
+and do not invent an envelope from prose.
 
-Do not invent an envelope format from prose. Create interoperability fixtures from the actual pinned code and run them against real test devices.
-
-Current mobile source also indicates that encrypted response-address handling is not generally supported in the generic-request validator path. Therefore the MVP must not depend on `encryptResponseToAddress`. Use TLS, signed requests/responses, minimum payloads, one-time nonces, and short retention. Re-evaluate encrypted response support only after a pinned compatibility test succeeds.
+Optional public-proof identity updates remain a separate later flow and may use a different request
+type. Issue #19 does not add that functionality.
 
 ## 4. Application identities
 
-Provision distinct VRSCTEST identities for:
+Use distinct VRSCTEST identities for:
 
 ```text
-cbc-app-auth-test@          Signs participant/committee authentication requests
+CONSTITUTION@                Hosted service signer for participant/committee LoginConsent requests
 cbc-app-proof-test@         Signs optional participant public-proof update requests
 cbc-protocol-test.VRSCTEST@ Owns the approved VRSCTEST project VDXF namespace and protocol metadata
 cbc-kelowna-committee-test@ Example committee identity for test fixtures
 ```
 
-The exact friendly names are deployment decisions. Persist and compare immutable i-addresses, not display names alone.
+The approved hosted request signer is `CONSTITUTION` at immutable VRSCTEST i-address
+`iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm`. Persist and compare immutable i-addresses, not display names
+alone.
 
 For each application identity, document:
 
@@ -100,76 +108,73 @@ Endpoint:
 POST /api/v1/auth/verus/challenges
 ```
 
-Authenticated application account required for linking. The server creates:
+An authenticated CBC account and separate optional-link consent are required. CBC derives an
+opaque account-bound state, calls the hosted service server-to-server, and receives the exact
+wallet presentation:
 
 ```json
 {
-  "challengeId": "opaque-high-entropy-id",
-  "nonce": "32-or-more-random-bytes",
-  "purpose": "link_verus_identity",
+  "challengeReference": "cbc-local-opaque-reference",
+  "purpose": "link_verusid",
   "audience": "cbc-participant-app",
   "environment": "vrsctest",
-  "requestedScopes": [
-    "cbc.account.verusid.link"
-  ],
-  "callbackUrl": "https://api.testnet.checksandbalances.services/api/v1/auth/verus/callback",
-  "issuedAt": "RFC3339",
-  "expiresAt": "RFC3339-short-window",
-  "requestVersion": "cbc.verus.auth.v1"
+  "requestedScopes": ["verusid:link"],
+  "requesterIdentity": "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+  "sameDeviceUrl": "exact-hosted-login-consent-uri",
+  "qrPayload": "same-exact-hosted-login-consent-uri",
+  "expiresAt": "RFC3339-five-minute-window",
+  "operational": false
 }
 ```
 
-The database stores the challenge hash/state, account, expected application signer, expected network, issued/expiry times, callback binding, and consumption state. Do not log the complete encoded request or response by default.
+The database stores the local account/trust-domain binding, remote challenge reference, opaque-state
+digest, exact presentation digest, local polling-token digest, expected hosted signer/callback,
+network, audience, scope, times, and consumption state. It does not store the deep link, hosted JWT,
+wallet response, or wallet secrets.
 
-### 5.3 Request envelope
+### 5.3 Hosted request and result contract
 
-Build a signed generic request using the pinned Verus libraries. The request must include or cryptographically bind:
+The hosted service must cryptographically bind and verify:
 
-- nonce/challenge ID;
-- purpose;
-- application audience;
-- callback URL;
-- VRSCTEST network/system;
-- issued and expiry conditions supported by the request format;
-- application/delegated identity where required;
-- human-readable application name and purpose; and
-- minimum requested identity/authentication information.
+- one-time challenge and CBC opaque state;
+- purpose and CBC audience;
+- its exact HTTPS wallet callback;
+- VRSCTEST network/system and approved `CONSTITUTION` signer;
+- issued/expiry conditions;
+- exact original signed request digest;
+- selected response signer and signature; and
+- current non-revoked identity state.
 
-The request is signed by the approved application VerusID. The server does not send an unsigned request where the selected request type or delegated/application identity requires a signature.
+Result retrieval is server-to-server, authenticated with a credential absent from the QR/deep link,
+and idempotent until CBC acknowledgment or expiry. The result token is signed and bound to exact
+issuer, CBC audience, challenge, opaque state, selected immutable identity, issued time, expiry, and
+unique token ID. CBC ignores any remote role.
 
-### 5.4 Callback and verification
+### 5.4 CBC verification and local consumption
 
-Endpoint:
+Verus Mobile posts directly to `https://auth.checksandbalances.services/verusidlogin`. CBC exposes no
+wallet callback endpoint. During authenticated CBC polling:
 
-```text
-POST /api/v1/auth/verus/callback
-```
+1. require the owning application session plus separate local polling token;
+2. reject expired, cancelled, consumed, unknown, or cross-account local challenges;
+3. retrieve the hosted result with the server credential;
+4. verify the exact token algorithm/signature, issuer, audience, challenge, state, identity, times,
+   and unique token ID;
+5. ensure the hosted signer/callback/network/presentation digest match the stored contract;
+6. ignore hosted role claims;
+7. resolve the selected identity by immutable i-address through private VRSCTEST RPC;
+8. reject wrong-system, recovered, revoked, inactive, or mismatched state;
+9. atomically consume the local challenge and create/update the minimum link; and
+10. append an audit event without retaining the token or wallet response.
 
-Treat callbacks as untrusted until every check passes:
-
-1. parse with strict size and type limits;
-2. locate the one-time challenge without exposing account existence;
-3. reject expired, cancelled, consumed, or unknown challenges;
-4. verify request/response correlation and nonce/state;
-5. verify expected audience and callback binding;
-6. verify VRSCTEST, not VRSC or another system;
-7. verify the original application request signature and signer identity;
-8. verify the participant response signature using supported Verus primitives;
-9. resolve the participant identity by immutable i-address;
-10. check current identity state, including revocation/recovery implications;
-11. ensure the selected response supplies only the requested scope;
-12. atomically consume the challenge and create/update the identity link;
-13. append an audit event; and
-14. return an idempotent generic acknowledgement.
-
-A duplicated callback for an already-completed challenge returns the existing terminal result without creating a second link.
+A duplicated poll returns the existing terminal result without another hosted result claim or link.
+A crash before local commit must not destroy the only remote proof; the hosted result remains
+retrievable until explicit acknowledgment or expiry.
 
 ### 5.5 Browser completion
 
-The browser receives state through one of:
-
-- same-device redirect/resume where supported; or
-- authenticated polling using a separate short-lived browser token.
+The browser receives only the wallet presentation and state through authenticated CBC polling with
+a separate short-lived local token. It never receives the hosted result JWT.
 
 Do not place the participant’s VerusID or a reusable authentication token in a query string.
 
@@ -181,7 +186,7 @@ Do not place the participant’s VerusID or a reusable authentication token in a
   "network": "VRSCTEST",
   "identityAddress": "i...",
   "identityDisplayNameSnapshot": "optional-display-only",
-  "proofMethod": "verus_generic_request_v1",
+  "proofMethod": "hosted_verusid_login_consent_v1",
   "provedAt": "RFC3339",
   "requestSignerIdentityAddress": "i...",
   "observedIdentityRevision": "implementation-specific",
@@ -446,40 +451,46 @@ Create a version-controlled matrix before enabling any wallet feature:
 
 | Component | Version/commit | Android tested | iOS tested | VRSCTEST auth | Identity update | QR | Same-device | Known limitations |
 |---|---|---:|---:|---:|---:|---:|---:|---|
-| Verus Mobile | Pin | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| `verus-typescript-primitives` | Pin | N/A | N/A | Pending | Pending | N/A | N/A | Pending |
-| `verusid-ts-client` | Pin | N/A | N/A | Pending | Pending | N/A | N/A | Pending |
-| `verusd` | Pin | N/A | N/A | Pending | Pending | N/A | N/A | Pending |
+| Verus Mobile Google Play | Pending Pixel 10 observation | Pending | N/A | Pending | Not in #19 | Pending | Pending | Do not reuse the obsolete Pixel 9 version |
+| Verus Mobile App Store | Pending BrowserStack observation | N/A | Pending | Pending | Not in #19 | Pending | Pending | Two-minute BrowserStack session; prepare request first |
+| Hosted `verusid-auth` | Health version `1.0.0`; immutable source/image pin pending | N/A | N/A | Health and challenge work; hardened result contract pending | Not in #19 | N/A | N/A | Current health/JWT/result retrieval do not yet satisfy ADR 0007 |
+| Hosted SDK/primitives | Exact deployed commits pending | N/A | N/A | Pending immutable deployment evidence | Not in #19 | N/A | N/A | Package manifest/build currently does not prove exact deployed pins |
+| `verusd` | `1.2.17-3` | N/A | N/A | Independent current identity readback available | Not in #19 | N/A | N/A | Private RPC only; mainnet blocked |
 
 A green result applies only to the exact combination tested. Upgrade through a compatibility pull request with fixture and device results.
+
+Exact service/device results and blockers are recorded in
+`docs/compatibility/verus-mobile-auth-v1.md`. CBC contract tests use sanitized in-memory hosted
+responses and never retain a live deep link, JWT, wallet callback, selected identity, or profile
+data. See ADR 0007 and the Verus Mobile linking runbook.
 
 ## 13. Required automated tests
 
 ### Unit/contract
 
-- canonical challenge bytes are deterministic;
-- nonce and expiry validation;
-- application audience and signer validation;
+- opaque account state is deterministic and keyed;
+- hosted presentation digest and expiry validation;
+- application audience, hosted contract, callback, and signer validation;
 - wrong-network rejection;
-- request/response correlation;
+- hosted result signature plus challenge/state correlation;
 - replay and duplicate callback handling;
 - identity address normalization;
 - current identity-state lookup;
 - forbidden-field rejection;
 - contentmultimap size and array-form validation;
 - public-proof update diff allowlist;
-- callback log redaction.
+- hosted token/deep-link log redaction and ignored remote roles.
 
 ### Integration
 
-- fake wallet success/decline/expiry;
-- VRSCTEST signed authentication fixture;
+- fake hosted-service success/pending/expiry;
+- hardened hosted-service contract fixture;
 - recovered/revoked identity fixture;
-- callback after browser disconnect;
+- hosted result after browser disconnect and CBC restart;
 - transaction ambiguity and readback reconciliation;
 - reorg simulation;
 - identity-update mismatch;
-- unsupported mobile version rejection or warning.
+- unsupported mobile/service version rejection or warning.
 
 ### Device tests
 
@@ -511,11 +522,11 @@ Do not expose per-identity wallet activity in public metrics.
 
 ## 15. Implementation order
 
-1. Pin source versions and record licences.
-2. Create application VRSCTEST identity and recovery/revocation runbook.
-3. Implement typed generic-request adapter and deterministic fixtures.
-4. Implement one-time challenge store and callback verifier.
-5. Implement fake wallet and automated integration tests.
+1. Pin hosted source/image/dependency versions and record licences.
+2. Approve the hosted VRSCTEST signer and recovery/revocation runbook.
+3. Harden and version the hosted LoginConsent/request/result contract.
+4. Implement the CBC hosted-service client and one-time local challenge store.
+5. Implement synthetic hosted-service and automated integration tests.
 6. Run Android/iOS authentication compatibility spike.
 7. Enable optional participant linking on the testnet host.
 8. Run committee-member authentication spike.

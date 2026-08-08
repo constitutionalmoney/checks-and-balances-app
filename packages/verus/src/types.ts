@@ -138,6 +138,8 @@ export interface VerifySignatureRequest extends SignDataRequest {
 export interface VerusSignatureResult {
   readonly hash: string;
   readonly signature: string;
+  readonly signatureHeight?: number;
+  readonly signatureStatus?: string;
 }
 
 export interface VerusRawTransaction {
@@ -150,6 +152,7 @@ export interface VerusBlock {
   readonly hash: string;
   readonly confirmations: number;
   readonly height: number;
+  readonly time: number;
   readonly transactions: readonly string[];
 }
 

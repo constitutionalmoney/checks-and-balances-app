@@ -41,6 +41,11 @@ components selected for the non-operational foundation and subsequent completed 
 | Redis container                     |             8.2.3-bookworm | Synthetic local queue/cache                          | RSALv2 OR SSPL-1.0 OR AGPL-3.0-only | Local service; deployment licensing requires review |
 | Mailpit container                   |                     1.30.6 | Local mail capture                                   | MIT                                 | Local development service                           |
 | WireMock container                  |                     3.13.2 | Fake allowlisted Verus readiness RPC                 | Apache-2.0                          | Local/CI test service                               |
+| Express                             |                      5.2.1 | Hosted VerusID HTTP contract                         | MIT                                 | Bundled hosted-auth runtime                         |
+| express-rate-limit                  |                      8.6.2 | Hosted-auth abuse limits                             | MIT                                 | Bundled hosted-auth runtime                         |
+| dotenv                              |                     17.4.2 | Hosted-auth local configuration                      | BSD-2-Clause                        | Bundled hosted-auth runtime                         |
+| jsonwebtoken                        |                      9.0.3 | Bound short-lived hosted result JWTs                 | MIT                                 | Bundled hosted-auth runtime                         |
+| Jest / Supertest                    |             30.4.2 / 7.2.2 | Hosted-auth contract tests                           | MIT                                 | Development and CI                                  |
 
 GitHub Actions are pinned by full commit SHA in `.github/workflows/ci.yml`. Checkout, Node setup,
 pnpm setup, dependency review, Gitleaks, Docker Buildx/build-push, and Trivy retain their upstream
@@ -50,12 +55,15 @@ MIT or Apache-2.0 licences and notices. CI receives no production secrets.
 
 Before a dependency is used in a release, record:
 
-| Component                           | Source/version    | Purpose                       | Licence          | Distributed? | Required notice/source action | Reviewer             |
-| ----------------------------------- | ----------------- | ----------------------------- | ---------------- | ------------ | ----------------------------- | -------------------- |
-| Verus Mobile integration references | Not used in WP-01 | Future wallet compatibility   | Not yet selected | No           | Deferred to issue #19         | Pending future issue |
-| Verus daemon/client integration     | Not used in WP-01 | Future private VRSCTEST RPC   | Not yet selected | No           | WP-01 uses WireMock only      | Pending future issue |
-| `verus-typescript-primitives`       | Not installed     | Future typed Verus structures | Not yet selected | No           | Deferred to issue #18/#19     | Pending future issue |
-| `verusid-ts-client`                 | Not installed     | Future wallet helpers         | Not yet selected | No           | Deferred to issue #19         | Pending future issue |
+| Component                       | Source/version                                                               | Purpose                                           | Licence        | Distributed?         | Required notice/source action                                                        | Reviewer                  |
+| ------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------- | -------------- | -------------------- | ------------------------------------------------------------------------------------ | ------------------------- |
+| Verus Mobile                    | Pending exact Google Play/App Store versions                                 | Hosted VRSCTEST LoginConsent compatibility        | Pending review | No                   | Record observed store versions and notices in issue #19                              | Pending device evidence   |
+| Verus daemon/client integration | Verus CLI `v1.2.17-3`; RPC client `fd2c6b0d35d468ee6174bcdd569f5aa990b05282` | Private VRSCTEST readback                         | MIT            | No                   | Pin daemon and client in deployed health metadata                                    | Deployment review pending |
+| `verus-typescript-primitives`   | `30c951804228a285546a45457be57ead39d90888`                                   | Hosted-service LoginConsent primitives            | MIT            | Yes, in hosted image | Preserve upstream licence and commit metadata                                        | Deployment review pending |
+| `verusid-ts-client`             | `48a1d48a5d076f313022a5891986339851ad7c0c`                                   | Hosted-service LoginConsent signing/verification  | MIT            | Yes, in hosted image | Preserve licence and commit metadata; legacy LoginConsent compatibility is temporary | Deployment review pending |
+| VerusCoin BitGoJS fork          | `7c754d4a5920198d9fe6827d3e23bd5cf431f264`                                   | Verus signature primitives used by hosted service | Apache-2.0     | Yes, in hosted image | Preserve upstream notices and exact commit metadata                                  | Deployment review pending |
+| VerusCoin `blake2b`             | `578dc12b7b68a3ce76d1e1add1402b28a5890a6b`                                   | Transitive Verus hashing dependency               | MIT            | Yes, in hosted image | Preserve upstream licence and exact commit metadata                                  | Deployment review pending |
+| `bitcoin-ops`                   | Vendored `1.4.1`                                                             | BitGoJS opcode dependency                         | MIT            | Yes, in hosted image | Preserve vendored licence/package metadata                                           | Deployment review pending |
 
 ## Rules
 

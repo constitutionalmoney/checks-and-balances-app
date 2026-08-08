@@ -1,0 +1,75 @@
+services:
+  verusid-auth:
+    image: ghcr.io/constitutionalmoney/checks-and-balances-verusid-auth@${VERUSID_AUTH_IMAGE_DIGEST:?Set the approved immutable GHCR digest}
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3001
+      TRUST_PROXY_HOPS: 1
+      CHAIN: vrsctest
+      CHAIN_IADDRESS: iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq
+      SIGNING_IADDRESS: iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm
+      PRIVATE_KEY: ${VERUSID_AUTH_PRIVATE_KEY:?Set the signer WIF in Dokploy secrets}
+      SERVER_URL: https://auth.checksandbalances.services
+      CALLBACK_URL: https://auth.checksandbalances.services/verusidlogin
+      CONTRACT_VERSION: cbc-verusid-auth.v1
+      JWT_ISSUER: checks-and-balances-verusid-auth
+      JWT_SECRET: ${VERUSID_AUTH_JWT_SECRET:?Set a distinct 32-byte JWT secret}
+      CBC_CLIENT_SECRET: ${VERUSID_AUTH_CLIENT_SECRET:?Set a distinct 32-byte service client secret}
+      CBC_ALLOWED_AUDIENCES: cbc-participant-app,cbc-committee-console
+      REDIS_URL: redis://redis:6379/0
+      VERUS_RPC_URL: ${VERUSID_AUTH_RPC_URL:?Set the private VRSCTEST RPC URL}
+      VERUS_RPC_USER: ${VERUSID_AUTH_RPC_USER:-}
+      VERUS_RPC_PASSWORD: ${VERUSID_AUTH_RPC_PASSWORD:-}
+      SERVICE_SOURCE_REVISION: ${SERVICE_SOURCE_REVISION:?Set the exact deployed Git commit}
+      IMAGE_DIGEST: ${VERUSID_AUTH_IMAGE_DIGEST:?Set the immutable deployed image digest}
+      VERUSID_TS_CLIENT_COMMIT: 48a1d48a5d076f313022a5891986339851ad7c0c
+      VERUS_PRIMITIVES_COMMIT: 30c951804228a285546a45457be57ead39d90888
+      VERUSD_RPC_CLIENT_COMMIT: fd2c6b0d35d468ee6174bcdd569f5aa990b05282
+      VERUS_BITGO_COMMIT: 7c754d4a5920198d9fe6827d3e23bd5cf431f264
+      VERUSD_VERSION: ${VERUSID_AUTH_VERUSD_VERSION:?Set the exact VRSCTEST daemon version}
+    expose:
+      - "3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks: [private, web]
+
+  redis:
+    image: redis:8.2.3-bookworm
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    volumes:
+      - verusid-auth-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+
+volumes:
+  verusid-auth-redis:
+
+networks:
+  private:
+    internal: true
+  web:

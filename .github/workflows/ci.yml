@@ -46,6 +46,34 @@ jobs:
       - run: pnpm build
       - run: pnpm license:check
 
+  hosted-auth-contract:
+    name: Hosted VerusID contract and Dokploy definition
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: services/verusid/package-lock.json
+      - name: Install exact hosted-auth dependencies
+        working-directory: services/verusid
+        run: npm ci --ignore-scripts
+      - name: Run hosted-auth contract tests
+        working-directory: services/verusid
+        run: npm test
+      - name: Validate hosted-auth Dokploy definition
+        working-directory: services/verusid
+        env:
+          SERVICE_SOURCE_REVISION: ${{ github.sha }}
+          VERUSID_AUTH_PRIVATE_KEY: ci-only-non-wallet-fixture
+          VERUSID_AUTH_JWT_SECRET: ci-only-distinct-jwt-secret-at-least-32-bytes
+          VERUSID_AUTH_CLIENT_SECRET: ci-only-distinct-client-secret-at-least-32-bytes
+          VERUSID_AUTH_RPC_URL: http://verusd.synthetic.invalid:19998
+          VERUSID_AUTH_IMAGE_DIGEST: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          VERUSID_AUTH_VERUSD_VERSION: v1.2.17-3
+        run: docker compose -f compose.dokploy.yaml config --quiet
+
   dependency-review:
     name: Dependency review
     if: github.event_name == 'pull_request'
@@ -118,7 +146,7 @@ jobs:
         run: docker compose -f infra/docker/compose.yaml down --volumes
 
   container-scan:
-    name: API container scan
+    name: API and hosted-auth container scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -138,6 +166,60 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: services/verusid
+          file: services/verusid/Dockerfile
+          build-args: SERVICE_SOURCE_REVISION=${{ github.sha }}
+          load: true
+          push: false
+          tags: cbc-verusid-auth:ci
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: cbc-verusid-auth:ci
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+  publish-hosted-auth:
+    name: Publish immutable hosted-auth image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [quality, hosted-auth-contract, secret-scan, local-stack, container-scan]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      - uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: publish
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: services/verusid
+          file: services/verusid/Dockerfile
+          build-args: SERVICE_SOURCE_REVISION=${{ github.sha }}
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/checks-and-balances-verusid-auth:${{ github.sha }}
+          provenance: mode=max
+          sbom: true
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/checks-and-balances-verusid-auth@${{ steps.publish.outputs.digest }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+      - name: Record immutable deployment reference
+        run: |
+          echo "## Hosted-auth deployment image" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source revision: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image: \`ghcr.io/${GITHUB_REPOSITORY_OWNER}/checks-and-balances-verusid-auth@${{ steps.publish.outputs.digest }}\`" >> "$GITHUB_STEP_SUMMARY"
 
   dco:
     name: DCO sign-off

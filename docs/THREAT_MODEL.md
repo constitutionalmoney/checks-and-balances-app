@@ -199,15 +199,15 @@ pilot operational testing remain open.
 
 ### T08 — Wallet request substitution
 
-**Attack:** malicious page/extension/QR replaces request or callback with attacker request.
+**Attack:** malicious page/extension/QR replaces the hosted LoginConsent request or sends CBC to an attacker-controlled authentication service.
 
-**Controls:** signed application request, exact request digest, trusted-domain display, QR from signed bytes, HTTPS, CSP, wallet signer validation, callback correlation, participant preview.
+**Controls:** exact hosted origin/contract/callback/network/request-signer pins, exact presentation digest, HTTPS, CSP, participant preview, authenticated server-to-server result retrieval, and local challenge/state correlation.
 
 ### T09 — Wallet response replay
 
-**Attack:** valid GenericResponse is reused to link another account or repeat an action.
+**Attack:** a valid hosted LoginConsent result is reused to link another account or repeat an action.
 
-**Controls:** high-entropy nonce, short expiry, account/audience binding, one-time atomic consumption, idempotent terminal result, replay audit, no reusable callback bearer token.
+**Controls:** high-entropy local polling token, short expiry, account/audience/challenge/state/JTI binding, authenticated result retrieval, one-time atomic local consumption, idempotent hosted result retention only until acknowledgement or expiry, and replay audit.
 
 ### T10 — Wrong-chain or wrong-identity response
 

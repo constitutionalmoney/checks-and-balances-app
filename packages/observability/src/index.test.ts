@@ -34,4 +34,30 @@ describe("createLogger", () => {
     expect(output).not.toContain("synthetic-recovery-bearer");
     expect(output).not.toContain("synthetic-cookie-bearer");
   });
+
+  it("redacts Verus Mobile request, response, token, and identity fields", async () => {
+    let output = "";
+    const destination = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    const logger = createLogger("test", "info", destination);
+
+    logger.info({
+      rawResponse: "raw-wallet-bytes",
+      requestId: "iRequest",
+      pollingToken: "poll-token",
+      qrPayload: "qr-payload",
+      sameDeviceUrl: "verus://1/private",
+      identityAddress: "iSelectedIdentity",
+    });
+
+    await new Promise<void>((resolve) => destination.end(resolve));
+    expect(output).not.toContain("raw-wallet-bytes");
+    expect(output).not.toContain("poll-token");
+    expect(output).not.toContain("iSelectedIdentity");
+    expect(output.match(/\[REDACTED\]/g)?.length).toBeGreaterThanOrEqual(6);
+  });
 });

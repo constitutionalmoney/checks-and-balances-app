@@ -198,6 +198,7 @@ export class HttpVerusRpcAdapter implements VerusRpcAdapter {
       hash: requireString(raw.hash, "hash"),
       confirmations: requireInteger(raw.confirmations, "confirmations"),
       height: requireInteger(raw.height, "height"),
+      time: requireInteger(raw.time, "time"),
       transactions: requireStringArray(raw.tx, "tx"),
     };
   }
@@ -391,8 +392,16 @@ function signatureRequestToRpc(request: SignDataRequest): JsonObject {
 
 function parseSignatureResult(value: unknown, field: string): VerusSignatureResult {
   const raw = requireObject(value, field);
+  const signatureHeight = raw.signatureheight;
+  const signatureStatus = raw.signaturestatus;
   return {
     hash: requireString(raw.hash, "hash"),
     signature: requireString(raw.signature, "signature"),
+    ...(signatureHeight === undefined
+      ? {}
+      : { signatureHeight: requireInteger(signatureHeight, "signatureheight") }),
+    ...(signatureStatus === undefined
+      ? {}
+      : { signatureStatus: requireString(signatureStatus, "signaturestatus") }),
   };
 }

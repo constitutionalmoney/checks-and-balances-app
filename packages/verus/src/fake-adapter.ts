@@ -59,6 +59,7 @@ export class FakeVerusRpcAdapter implements VerusRpcAdapter {
       hash: this.blockchain.bestBlockHash,
       confirmations: this.confirmationsAfterWrite,
       height: this.blockchain.blocks,
+      time: 1_800_000_000,
       transactions: [],
     });
   }
@@ -174,6 +175,7 @@ export class FakeVerusRpcAdapter implements VerusRpcAdapter {
       hash: blockHash,
       confirmations: this.confirmationsAfterWrite,
       height: this.blockchain.blocks,
+      time: currentBlock?.time ?? 1_800_000_000,
       transactions: [...(currentBlock?.transactions ?? []), transactionId],
     });
     this.blockHashes.set(this.blockchain.blocks, blockHash);
@@ -182,12 +184,12 @@ export class FakeVerusRpcAdapter implements VerusRpcAdapter {
 
   async signData(request: SignDataRequest): Promise<VerusSignatureResult> {
     this.before("signdata");
-    return syntheticSignature(request);
+    return syntheticSignature(request, this.blockchain.blocks);
   }
 
   async verifySignature(request: VerifySignatureRequest): Promise<VerusSignatureResult> {
     this.before("verifysignature");
-    const expected = syntheticSignature(request);
+    const expected = syntheticSignature(request, this.blockchain.blocks);
     if (request.signature !== expected.signature) {
       throw new VerusIntegrationError(
         "RPC_METHOD_ERROR",
@@ -325,14 +327,19 @@ export function syntheticIdentityResult(
   };
 }
 
-function syntheticSignature(request: SignDataRequest): VerusSignatureResult {
+function syntheticSignature(request: SignDataRequest, height: number): VerusSignatureResult {
   const material = [request.address, request.dataHash, request.hashType, request.prefixString].join(
     "\u001f",
   );
+  const signature = Buffer.alloc(38);
+  signature[0] = 2;
+  signature[1] = 5;
+  signature.writeUInt32LE(height, 2);
+  createHash("sha256").update(material, "utf8").digest().copy(signature, 6);
   return {
     hash: request.dataHash,
-    signature: Buffer.from(createHash("sha256").update(material, "utf8").digest()).toString(
-      "base64",
-    ),
+    signature: signature.toString("base64"),
+    signatureHeight: height,
+    signatureStatus: "verified",
   };
 }

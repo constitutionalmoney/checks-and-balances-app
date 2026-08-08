@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "NestJS/Fastify health and protocol-status shell",
+  "description": "NestJS/Fastify status and disabled-by-default VRSCTEST linking API",
   "license": "Apache-2.0",
   "main": "dist/main.js",
   "scripts": {
@@ -14,11 +14,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cbc/auth": "workspace:*",
     "@cbc/config": "workspace:*",
     "@cbc/contracts": "workspace:*",
     "@cbc/db": "workspace:*",
     "@cbc/observability": "workspace:*",
     "@cbc/verus": "workspace:*",
+    "@cbc/verus-linking": "workspace:*",
     "@fastify/cors": "11.3.0",
     "@fastify/helmet": "13.1.0",
     "@nestjs/common": "11.1.28",

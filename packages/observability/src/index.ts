@@ -22,6 +22,12 @@ const REDACTED_PATHS = [
   "contact",
   "destination",
   "walletPayload",
+  "rawResponse",
+  "requestId",
+  "pollingToken",
+  "qrPayload",
+  "sameDeviceUrl",
+  "identityAddress",
   "evidence",
   "exactAddress",
   "email",
@@ -32,6 +38,12 @@ const REDACTED_PATHS = [
   "*.credential",
   "*.contact",
   "*.destination",
+  "*.rawResponse",
+  "*.requestId",
+  "*.pollingToken",
+  "*.qrPayload",
+  "*.sameDeviceUrl",
+  "*.identityAddress",
 ] as const;
 
 export function createLogger(

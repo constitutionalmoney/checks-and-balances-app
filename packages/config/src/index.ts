@@ -2,11 +2,24 @@ import { z } from "zod";
 
 export const CBC_ENVIRONMENTS = ["local", "ci", "testnet", "pilot", "production"] as const;
 export const CBC_VERUS_NETWORKS = ["FAKE", "VRSCTEST"] as const;
+export const APPROVED_VERUS_LINK_APPLICATION_IDENTITY =
+  "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm" as const;
+export const APPROVED_VERUS_AUTH_URL = "https://auth.checksandbalances.services" as const;
+export const APPROVED_VERUS_AUTH_CALLBACK_URL =
+  "https://auth.checksandbalances.services/verusidlogin" as const;
+export const APPROVED_VERUS_AUTH_ISSUER = "checks-and-balances-verusid-auth" as const;
+export const APPROVED_VERUS_AUTH_CONTRACT_VERSION = "cbc-verusid-auth.v1" as const;
+export const APPROVED_VERUS_AUTH_SDK_COMMIT = "48a1d48a5d076f313022a5891986339851ad7c0c" as const;
+export const APPROVED_VERUS_AUTH_PRIMITIVES_COMMIT =
+  "30c951804228a285546a45457be57ead39d90888" as const;
+export const APPROVED_VERUS_AUTH_RPC_CLIENT_COMMIT =
+  "fd2c6b0d35d468ee6174bcdd569f5aa990b05282" as const;
+export const APPROVED_VERUS_AUTH_BITGO_COMMIT = "7c754d4a5920198d9fe6827d3e23bd5cf431f264" as const;
+export const APPROVED_VERUS_AUTH_DAEMON_VERSION = "v1.2.17-3" as const;
 
 export const DISABLED_FEATURE_FLAGS = [
   "CBC_PUBLIC_DIRECTORY_ENABLED",
   "CBC_PUBLIC_SESSIONS_ENABLED",
-  "CBC_VERUS_LINKING_ENABLED",
   "CBC_VERUS_IDENTITY_UPDATE_ENABLED",
   "CBC_COMMITTEE_SIGNING_ENABLED",
   "CBC_RANDOM_RENEWAL_ENABLED",
@@ -21,6 +34,48 @@ const disabledFeature = z
   .union([z.literal("false"), z.literal("0"), z.literal(false)])
   .transform(() => false)
   .default(false);
+
+const featureToggle = z
+  .union([
+    z.literal("true"),
+    z.literal("1"),
+    z.literal(true),
+    z.literal("false"),
+    z.literal("0"),
+    z.literal(false),
+  ])
+  .transform((value) => value === true || value === "true" || value === "1")
+  .default(false);
+
+const optionalIAddress = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^i[1-9A-HJ-NP-Za-km-z]{20,50}$/)
+    .optional(),
+);
+const optionalUrl = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().url().optional(),
+);
+const optionalSecret = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().min(32).optional(),
+);
+const optionalCommit = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^[a-f0-9]{40}$/)
+    .optional(),
+);
+const optionalImageDigest = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z
+    .string()
+    .regex(/^sha256:[a-f0-9]{64}$/)
+    .optional(),
+);
 
 const schema = z.object({
   CBC_ENVIRONMENT: z.enum(CBC_ENVIRONMENTS),
@@ -47,7 +102,51 @@ const schema = z.object({
   CBC_SERVICE_PORT: z.coerce.number().int().min(1).max(65_535).optional(),
   CBC_PUBLIC_DIRECTORY_ENABLED: disabledFeature,
   CBC_PUBLIC_SESSIONS_ENABLED: disabledFeature,
-  CBC_VERUS_LINKING_ENABLED: disabledFeature,
+  CBC_VERUS_LINKING_ENABLED: featureToggle,
+  CBC_VERUS_LINK_APPLICATION_IDENTITY: optionalIAddress,
+  CBC_VERUS_AUTH_URL: optionalUrl,
+  CBC_VERUS_AUTH_CALLBACK_URL: optionalUrl,
+  CBC_VERUS_AUTH_SERVICE_VERSION: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z
+      .string()
+      .regex(/^\d+\.\d+\.\d+$/)
+      .optional(),
+  ),
+  CBC_VERUS_AUTH_ISSUER: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(1).max(128).optional(),
+  ),
+  CBC_VERUS_AUTH_CONTRACT_VERSION: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_CONTRACT_VERSION).optional(),
+  ),
+  CBC_VERUS_AUTH_SOURCE_REVISION: optionalCommit,
+  CBC_VERUS_AUTH_IMAGE_DIGEST: optionalImageDigest,
+  CBC_VERUS_AUTH_SDK_COMMIT: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_SDK_COMMIT).optional(),
+  ),
+  CBC_VERUS_AUTH_PRIMITIVES_COMMIT: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_PRIMITIVES_COMMIT).optional(),
+  ),
+  CBC_VERUS_AUTH_RPC_CLIENT_COMMIT: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_RPC_CLIENT_COMMIT).optional(),
+  ),
+  CBC_VERUS_AUTH_BITGO_COMMIT: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_BITGO_COMMIT).optional(),
+  ),
+  CBC_VERUS_AUTH_DAEMON_VERSION: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.literal(APPROVED_VERUS_AUTH_DAEMON_VERSION).optional(),
+  ),
+  CBC_VERUS_AUTH_CLIENT_SECRET: optionalSecret,
+  CBC_VERUS_AUTH_JWT_SECRET: optionalSecret,
+  CBC_VERUS_LINK_BINDING_SECRET: optionalSecret,
+  CBC_VERUS_LINK_POLLING_SECRET: optionalSecret,
   CBC_VERUS_IDENTITY_UPDATE_ENABLED: disabledFeature,
   CBC_COMMITTEE_SIGNING_ENABLED: disabledFeature,
   CBC_RANDOM_RENEWAL_ENABLED: disabledFeature,
@@ -202,6 +301,87 @@ export function loadRuntimeConfig(input: EnvironmentInput = process.env): Runtim
     ].filter((value): value is string => value !== undefined);
     if (missing.length > 0) {
       throw new Error(`Invalid runtime configuration: VRSCTEST requires ${missing.join(" and ")}`);
+    }
+  }
+
+  if (config.CBC_VERUS_LINKING_ENABLED) {
+    if (config.CBC_VERUS_NETWORK !== "VRSCTEST") {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires CBC_VERUS_NETWORK=VRSCTEST",
+      );
+    }
+    const required = [
+      !nonEmpty(config.CBC_VERUS_LINK_APPLICATION_IDENTITY)
+        ? "CBC_VERUS_LINK_APPLICATION_IDENTITY"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_URL) ? "CBC_VERUS_AUTH_URL" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_CALLBACK_URL) ? "CBC_VERUS_AUTH_CALLBACK_URL" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_SERVICE_VERSION)
+        ? "CBC_VERUS_AUTH_SERVICE_VERSION"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_ISSUER) ? "CBC_VERUS_AUTH_ISSUER" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_CONTRACT_VERSION)
+        ? "CBC_VERUS_AUTH_CONTRACT_VERSION"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_SOURCE_REVISION)
+        ? "CBC_VERUS_AUTH_SOURCE_REVISION"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_IMAGE_DIGEST) ? "CBC_VERUS_AUTH_IMAGE_DIGEST" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_SDK_COMMIT) ? "CBC_VERUS_AUTH_SDK_COMMIT" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_PRIMITIVES_COMMIT)
+        ? "CBC_VERUS_AUTH_PRIMITIVES_COMMIT"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_RPC_CLIENT_COMMIT)
+        ? "CBC_VERUS_AUTH_RPC_CLIENT_COMMIT"
+        : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_BITGO_COMMIT) ? "CBC_VERUS_AUTH_BITGO_COMMIT" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_DAEMON_VERSION) ? "CBC_VERUS_AUTH_DAEMON_VERSION" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_CLIENT_SECRET) ? "CBC_VERUS_AUTH_CLIENT_SECRET" : undefined,
+      !nonEmpty(config.CBC_VERUS_AUTH_JWT_SECRET) ? "CBC_VERUS_AUTH_JWT_SECRET" : undefined,
+      !nonEmpty(config.CBC_VERUS_LINK_BINDING_SECRET) ? "CBC_VERUS_LINK_BINDING_SECRET" : undefined,
+      !nonEmpty(config.CBC_VERUS_LINK_POLLING_SECRET) ? "CBC_VERUS_LINK_POLLING_SECRET" : undefined,
+    ].filter((value): value is string => value !== undefined);
+    if (required.length > 0) {
+      throw new Error(
+        `Invalid runtime configuration: VerusID linking requires ${required.join(", ")}`,
+      );
+    }
+    if (config.CBC_VERUS_LINK_APPLICATION_IDENTITY !== APPROVED_VERUS_LINK_APPLICATION_IDENTITY) {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires the approved VRSCTEST application identity",
+      );
+    }
+    if (config.CBC_VERUS_AUTH_URL !== APPROVED_VERUS_AUTH_URL) {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires the approved hosted auth URL",
+      );
+    }
+    if (config.CBC_VERUS_AUTH_CALLBACK_URL !== APPROVED_VERUS_AUTH_CALLBACK_URL) {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires the approved hosted callback URL",
+      );
+    }
+    if (config.CBC_VERUS_AUTH_ISSUER !== APPROVED_VERUS_AUTH_ISSUER) {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires the approved hosted token issuer",
+      );
+    }
+    if (config.CBC_VERUS_AUTH_CONTRACT_VERSION !== APPROVED_VERUS_AUTH_CONTRACT_VERSION) {
+      throw new Error(
+        "Invalid runtime configuration: VerusID linking requires the approved hosted auth contract",
+      );
+    }
+    const linkSecrets = [
+      config.CBC_VERUS_AUTH_CLIENT_SECRET!,
+      config.CBC_VERUS_AUTH_JWT_SECRET!,
+      config.CBC_VERUS_LINK_BINDING_SECRET!,
+      config.CBC_VERUS_LINK_POLLING_SECRET!,
+      config.CBC_RATE_LIMIT_SECRET,
+      config.CBC_PARTICIPANT_AUTH_SECRET,
+      config.CBC_COMMITTEE_AUTH_SECRET,
+    ];
+    if (new Set(linkSecrets).size !== linkSecrets.length) {
+      throw new Error("Invalid runtime configuration: VerusID linking secrets must be distinct");
     }
   }
 

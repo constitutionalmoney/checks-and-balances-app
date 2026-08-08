@@ -17,7 +17,13 @@ export class RateLimiter {
   ) {}
 
   async requireWithinLimit(input: {
-    readonly bucket: "login_network" | "login_account" | "recovery_network" | "recovery_account";
+    readonly bucket:
+      | "login_network"
+      | "login_account"
+      | "recovery_network"
+      | "recovery_account"
+      | "wallet_callback_network"
+      | "wallet_link_account";
     readonly opaqueSubject: string;
     readonly now: Date;
     readonly windowMs: number;

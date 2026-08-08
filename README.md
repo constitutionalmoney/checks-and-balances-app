@@ -17,6 +17,9 @@ This repository is the implementation home for the **Checks & Balances Protocol*
 - No planned feature may be described as operational until its release gate has passed.
 - The issue #17 authentication/authorization core is implemented for synthetic development only;
   no participant or committee sign-in interface or public authentication endpoint is live.
+- Issue #19's optional VerusID-linking core is integrating with the existing hosted VRSCTEST
+  `verusid-auth` service. Linking remains disabled and non-operational pending a hardened hosted
+  trust contract plus exact Android/iOS store-client compatibility approval.
 
 The website, repository documentation, deployed application, and public API status must tell the same story. Where historical or archived material conflicts with the current protocol documentation, the current protocol documentation controls.
 
@@ -113,10 +116,10 @@ participant/committee app -> API -> transactional outbox -> Verus worker -> priv
 
 Planned wallet flows:
 
-- signed `GenericRequest` / `GenericResponse` for optional VerusID authentication and account linking;
+- hosted signed `LoginConsentRequest` / `LoginConsentResponse` for optional VerusID account linking;
 - same-device Verus Mobile deep link where supported;
 - desktop QR fallback;
-- public HTTPS callback with nonce, expiry, audience, network, signer, identity-state, and signature validation;
+- hosted HTTPS wallet callback plus authenticated, account-bound CBC result polling and independent VRSCTEST identity readback;
 - committee-member wallet approval only after compatibility and threshold testing; and
 - optional `IdentityUpdateRequest` for an explicit, participant-approved public proof reference only after privacy review and mobile compatibility testing.
 
@@ -140,12 +143,15 @@ packages/
   domain/             Explicit policy-neutral lifecycle commands
   db/                 PostgreSQL domain, audit, outbox, and auth repositories
   auth/               Passkeys, sessions, recovery, authorization, and consent policy core
-  verus/              Readiness-only fake/private RPC boundary; no writes
+  verus/              Private typed VRSCTEST RPC, guarded writes, and readback
+  verus-linking/      Optional account-bound VerusID linking service
   contracts/          Health/status OpenAPI and shared release status
   ui/                 Shared accessible shell and status banner
   config/             Typed fail-closed environment configuration
   observability/      Structured redacted logging
   testkit/            Synthetic-only fixture boundary
+services/
+  verusid/            CBC-scoped VRSCTEST hosted-auth service and Dokploy definition
 schemas/
   cbc-human-attestation.schema.json
   cbc-public-status.schema.json
@@ -167,13 +173,14 @@ infra/
   monitoring/
 ```
 
-The WP-01 application foundation and issue #16 domain/persistence core are scaffolded. Every app is an empty shell labelled
-**Specification / VRSCTEST / Not operational**. The API exposes only health, readiness, generated
-OpenAPI, and protocol-status routes; the worker registers no protocol jobs. Public controllers,
-accounts, participant collection, committee operations UI, document uploads, wallet flows, Verus
-writes, and mainnet support remain absent. Internal packages now provide named lifecycles, exact
-expiry, tenant-safe records, append-only audit, idempotency, and a crash-safe outbox for later
-vertical slices; this does not make a public workflow operational.
+The WP-01 foundation and Issues #16-#18 domain, authentication, and crash-safe VRSCTEST worker
+cores are scaffolded. Every app remains labelled **Specification / VRSCTEST / Not operational**.
+Issue #19 now includes a fail-closed hosted-auth service/client contract plus local account binding,
+but the new auth hostname, immutable image, wallet route, and UI are not enabled or accepted.
+Participant collection, committee operations UI, document uploads, public-proof identity updates,
+and mainnet support remain absent. Internal packages provide named lifecycles,
+exact expiry, tenant-safe records, append-only audit, idempotency, and a crash-safe outbox; none of
+this makes a public workflow operational.
 
 ## Development
 
