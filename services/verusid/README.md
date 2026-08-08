@@ -4,6 +4,10 @@ This directory contains the CBC-scoped, VRSCTEST-only hosted authentication serv
 #19. Its approved origin is `https://auth.checksandbalances.services`; Verus Mobile posts the
 signed response to `/verusidlogin` there.
 
+The only approved request signer is `CHECKBALANCE.VRSCTEST@`
+(`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`). Runtime configuration rejects any other signer. Its WIF is
+supplied only through the hosted service secret manager and never enters CBC application data.
+
 The service proves control of a selected VerusID for optional CBC account linking. It does not
 authenticate a CBC account, assign a role, establish identity or residency, issue an attestation,
 write to Verus, accept evidence, or support mainnet.

@@ -7,7 +7,9 @@ port.
 
 ## Required Dokploy values
 
-- `VERUSID_AUTH_PRIVATE_KEY`: WIF for the approved `CONSTITUTION` VRSCTEST signer.
+- `VERUSID_AUTH_PRIVATE_KEY`: WIF for the approved `CHECKBALANCE.VRSCTEST@` signer
+  (`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`). Enter it directly into Dokploy; never expose it through
+  Git, logs, support messages, or the CBC application.
 - `VERUSID_AUTH_JWT_SECRET`: random value of at least 32 bytes, used only for result JWTs.
 - `VERUSID_AUTH_CLIENT_SECRET`: distinct random value of at least 32 bytes, also configured as
   `CBC_VERUS_AUTH_CLIENT_SECRET` on the CBC API.
@@ -17,6 +19,11 @@ port.
 - `VERUSID_AUTH_IMAGE_DIGEST`: immutable digest from the successful main-branch
   `Publish immutable hosted-auth image` job.
 - `VERUSID_AUTH_VERUSD_VERSION`: exact daemon version serving the RPC endpoint.
+
+Before inserting the WIF, independently read `CHECKBALANCE.VRSCTEST@` from VRSCTEST and require
+identity address `iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`, status `active`, primary address
+`RDExW3nvnGGrjKgSNXivaTby6bp5wDn2bc`, and recovery/revocation authority
+`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`. Do not deploy the recovery authority's key with this service.
 
 Do not display environment variables from the container. Do not paste WIFs, JWT secrets, client
 secrets, RPC credentials, raw wallet callbacks, or result tokens into logs or support messages.

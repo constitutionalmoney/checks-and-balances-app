@@ -15,7 +15,7 @@ services:
       TRUST_PROXY_HOPS: 1
       CHAIN: vrsctest
       CHAIN_IADDRESS: iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq
-      SIGNING_IADDRESS: iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm
+      SIGNING_IADDRESS: iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP
       PRIVATE_KEY: ${VERUSID_AUTH_PRIVATE_KEY:?Set the signer WIF in Dokploy secrets}
       SERVER_URL: https://auth.checksandbalances.services
       CALLBACK_URL: https://auth.checksandbalances.services/verusidlogin

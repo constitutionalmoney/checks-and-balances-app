@@ -3,7 +3,7 @@ import { z } from "zod";
 export const CBC_ENVIRONMENTS = ["local", "ci", "testnet", "pilot", "production"] as const;
 export const CBC_VERUS_NETWORKS = ["FAKE", "VRSCTEST"] as const;
 export const APPROVED_VERUS_LINK_APPLICATION_IDENTITY =
-  "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm" as const;
+  "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP" as const;
 export const APPROVED_VERUS_AUTH_URL = "https://auth.checksandbalances.services" as const;
 export const APPROVED_VERUS_AUTH_CALLBACK_URL =
   "https://auth.checksandbalances.services/verusidlogin" as const;

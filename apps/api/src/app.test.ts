@@ -87,7 +87,7 @@ describe("API foundation shell", () => {
         return {
           challengeReference: "wallet_challenge_synthetic0001",
           network: "VRSCTEST",
-          requesterIdentity: "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+          requesterIdentity: "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP",
           purpose: "link_verusid",
           scopes: ["verusid:link"],
           expiresAt: "2027-01-15T08:05:00.000Z",
@@ -122,7 +122,7 @@ describe("API foundation shell", () => {
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
       network: "VRSCTEST",
-      requesterIdentity: "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+      requesterIdentity: "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP",
       operational: false,
     });
     expect(response.body).not.toContain("JWT");

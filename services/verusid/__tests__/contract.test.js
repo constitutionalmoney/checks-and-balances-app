@@ -18,7 +18,7 @@ const { MemoryStore } = require("../src/store");
 const CLIENT_SECRET = "client-secret-for-tests-that-is-long-enough";
 const JWT_SECRET = "jwt-secret-for-tests-that-is-distinct-and-long";
 const CHALLENGE_ID = "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq";
-const IDENTITY_ID = "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm";
+const IDENTITY_ID = "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM";
 const DEEP_LINK = `${LOGIN_CONSENT_SCHEME}synthetic-contract-fixture`;
 const REQUEST_OBJECT_DIGEST = "a".repeat(64);
 const STATE = "state_binding_value_that_is_at_least_32_chars_123";
@@ -35,7 +35,7 @@ function config() {
     jwtSecret: JWT_SECRET,
     clientSecret: CLIENT_SECRET,
     allowedAudiences: new Set(["cbc-participant-app", "cbc-committee-console"]),
-    serviceVersion: "1.1.0",
+    serviceVersion: "1.1.1",
     serviceSourceRevision: "1".repeat(40),
     imageDigest: `sha256:${"2".repeat(64)}`,
     sdkCommit: "3".repeat(40),
@@ -113,7 +113,7 @@ describe("CBC hosted VerusID auth contract", () => {
     expect(response.body).toMatchObject({
       status: "ok",
       service: "verusid-auth",
-      version: "1.1.0",
+      version: "1.1.1",
       chain: "vrsctest",
       network: "VRSCTEST",
       contract_version: CONTRACT_VERSION,
@@ -272,5 +272,11 @@ describe("production configuration", () => {
     expect(() =>
       loadConfig(productionEnvironment({ SERVER_URL: "https://auth.constitution.money" })),
     ).toThrow(`SERVER_URL must be ${APPROVED_SERVER_URL}`);
+  });
+
+  test("rejects the former CONSTITUTION signing identity", () => {
+    expect(() =>
+      loadConfig(productionEnvironment({ SIGNING_IADDRESS: "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm" })),
+    ).toThrow(`SIGNING_IADDRESS must be ${APPROVED_SIGNING_IDENTITY}`);
   });
 });
