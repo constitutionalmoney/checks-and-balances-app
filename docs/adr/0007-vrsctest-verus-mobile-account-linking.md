@@ -2,6 +2,7 @@
 
 - Status: architecture accepted; hosted-service and device compatibility gates pending
 - Date: 2026-08-07
+- Amended: 2026-08-08 (dedicated CHECKBALANCE request signer)
 - Decision scope: Issue #19 optional VerusID account linking
 - Mainnet effect: none; VRSC/mainnet is not a representable linking network
 
@@ -29,9 +30,18 @@ blockers, not reasons to weaken CBC verification.
 ## Decision
 
 CBC consumes the hosted service through a narrow server-to-server client. CBC has no wallet
-callback route and no Verus application signing key. The approved request signer is
-`CONSTITUTION` on VRSCTEST at immutable i-address
-`iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm`.
+callback route and no Verus application signing key. The approved request signer is the dedicated
+`CHECKBALANCE.VRSCTEST@` identity at immutable i-address
+`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`. Its primary signing address is held only by the hosted
+service secret manager. Recovery and revocation are delegated to the separately controlled
+`cbc-app-auth-test.VRSCTEST@` identity (`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`), whose key is not
+deployed with the hosted service.
+
+The hosted service pins `https://api.verustest.net` without RPC credentials for the read-only
+VRSCTEST queries required by the LoginConsent SDK and verification adapter. The signer WIF stays
+local to the hosted process. This public read dependency does not replace CBC's private VPS
+`verusd`: CBC independently reads current identity state there, and every worker/write path stays
+on that private authenticated boundary.
 
 For each five-minute ceremony CBC:
 

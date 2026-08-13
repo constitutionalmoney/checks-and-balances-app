@@ -2,7 +2,7 @@
 title: Verus Mobile Integration Specification
 version: 1.0
 status: Hosted-service integration implemented fail-closed; service and device compatibility pending
-last_updated: 2026-08-07
+last_updated: 2026-08-08
 target_network: VRSCTEST
 ---
 
@@ -54,15 +54,19 @@ type. Issue #19 does not add that functionality.
 Use distinct VRSCTEST identities for:
 
 ```text
-CONSTITUTION@                Hosted service signer for participant/committee LoginConsent requests
+CHECKBALANCE.VRSCTEST@       Hosted service signer for participant/committee LoginConsent requests
 cbc-app-proof-test@         Signs optional participant public-proof update requests
 cbc-protocol-test.VRSCTEST@ Owns the approved VRSCTEST project VDXF namespace and protocol metadata
 cbc-kelowna-committee-test@ Example committee identity for test fixtures
 ```
 
-The approved hosted request signer is `CONSTITUTION` at immutable VRSCTEST i-address
-`iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm`. Persist and compare immutable i-addresses, not display names
-alone.
+The approved hosted request signer is `CHECKBALANCE.VRSCTEST@` at immutable VRSCTEST i-address
+`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`. Its primary signing address is
+`RDExW3nvnGGrjKgSNXivaTby6bp5wDn2bc`; recovery and revocation are delegated to the separately
+controlled `cbc-app-auth-test.VRSCTEST@` identity (`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`).
+Persist and compare immutable i-addresses, not display names alone. The hosted service receives
+only the CHECKBALANCE primary WIF through its secret manager; the recovery authority is not a
+runtime signer.
 
 For each application identity, document:
 
@@ -119,7 +123,7 @@ wallet presentation:
   "audience": "cbc-participant-app",
   "environment": "vrsctest",
   "requestedScopes": ["verusid:link"],
-  "requesterIdentity": "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm",
+  "requesterIdentity": "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP",
   "sameDeviceUrl": "exact-hosted-login-consent-uri",
   "qrPayload": "same-exact-hosted-login-consent-uri",
   "expiresAt": "RFC3339-five-minute-window",
@@ -139,7 +143,7 @@ The hosted service must cryptographically bind and verify:
 - one-time challenge and CBC opaque state;
 - purpose and CBC audience;
 - its exact HTTPS wallet callback;
-- VRSCTEST network/system and approved `CONSTITUTION` signer;
+- VRSCTEST network/system and approved `CHECKBALANCE.VRSCTEST@` signer;
 - issued/expiry conditions;
 - exact original signed request digest;
 - selected response signer and signature; and
@@ -162,7 +166,8 @@ wallet callback endpoint. During authenticated CBC polling:
    and unique token ID;
 5. ensure the hosted signer/callback/network/presentation digest match the stored contract;
 6. ignore hosted role claims;
-7. resolve the selected identity by immutable i-address through private VRSCTEST RPC;
+7. resolve the selected identity by immutable i-address through CBC's private VRSCTEST RPC,
+   independently of the hosted service's pinned public read-only API;
 8. reject wrong-system, recovered, revoked, inactive, or mismatched state;
 9. atomically consume the local challenge and create/update the minimum link; and
 10. append an audit event without retaining the token or wallet response.

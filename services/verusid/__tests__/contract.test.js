@@ -6,6 +6,7 @@ const {
   APPROVED_CALLBACK_URL,
   APPROVED_SERVER_URL,
   APPROVED_SIGNING_IDENTITY,
+  APPROVED_VERUS_RPC_URL,
   CONTRACT_VERSION,
   JWT_ISSUER,
   LOGIN_CONSENT_SCHEME,
@@ -18,7 +19,7 @@ const { MemoryStore } = require("../src/store");
 const CLIENT_SECRET = "client-secret-for-tests-that-is-long-enough";
 const JWT_SECRET = "jwt-secret-for-tests-that-is-distinct-and-long";
 const CHALLENGE_ID = "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq";
-const IDENTITY_ID = "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm";
+const IDENTITY_ID = "iC7jT1JAJJZHrS4JnHRbgLn9qUQokMsedM";
 const DEEP_LINK = `${LOGIN_CONSENT_SCHEME}synthetic-contract-fixture`;
 const REQUEST_OBJECT_DIGEST = "a".repeat(64);
 const STATE = "state_binding_value_that_is_at_least_32_chars_123";
@@ -35,7 +36,7 @@ function config() {
     jwtSecret: JWT_SECRET,
     clientSecret: CLIENT_SECRET,
     allowedAudiences: new Set(["cbc-participant-app", "cbc-committee-console"]),
-    serviceVersion: "1.1.0",
+    serviceVersion: "1.1.1",
     serviceSourceRevision: "1".repeat(40),
     imageDigest: `sha256:${"2".repeat(64)}`,
     sdkCommit: "3".repeat(40),
@@ -43,6 +44,7 @@ function config() {
     rpcClientCommit: "5".repeat(40),
     bitgoCommit: "6".repeat(40),
     daemonVersion: "v1.2.17-3",
+    rpcUrl: APPROVED_VERUS_RPC_URL,
     challengeLifetimeMs: 5 * 60_000,
     resultTokenMaxLifetimeSeconds: 120,
   });
@@ -113,12 +115,13 @@ describe("CBC hosted VerusID auth contract", () => {
     expect(response.body).toMatchObject({
       status: "ok",
       service: "verusid-auth",
-      version: "1.1.0",
+      version: "1.1.1",
       chain: "vrsctest",
       network: "VRSCTEST",
       contract_version: CONTRACT_VERSION,
       signing_identity: APPROVED_SIGNING_IDENTITY,
       callback_url: APPROVED_CALLBACK_URL,
+      chain_read_url: APPROVED_VERUS_RPC_URL,
       jwt_issuer: JWT_ISSUER,
       result_authentication: "client_secret",
       result_delivery: "idempotent_until_ack",
@@ -247,7 +250,7 @@ describe("production configuration", () => {
       CONTRACT_VERSION,
       JWT_ISSUER,
       REDIS_URL: "redis://redis:6379/0",
-      VERUS_RPC_URL: "http://verusd:19998",
+      VERUS_RPC_URL: APPROVED_VERUS_RPC_URL,
       SERVICE_SOURCE_REVISION: "1".repeat(40),
       IMAGE_DIGEST: `sha256:${"2".repeat(64)}`,
       VERUSID_TS_CLIENT_COMMIT: "3".repeat(40),
@@ -272,5 +275,23 @@ describe("production configuration", () => {
     expect(() =>
       loadConfig(productionEnvironment({ SERVER_URL: "https://auth.constitution.money" })),
     ).toThrow(`SERVER_URL must be ${APPROVED_SERVER_URL}`);
+  });
+
+  test("rejects the former CONSTITUTION signing identity", () => {
+    expect(() =>
+      loadConfig(productionEnvironment({ SIGNING_IADDRESS: "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm" })),
+    ).toThrow(`SIGNING_IADDRESS must be ${APPROVED_SIGNING_IDENTITY}`);
+  });
+
+  test("pins unauthenticated public VRSCTEST reads", () => {
+    expect(() =>
+      loadConfig(productionEnvironment({ VERUS_RPC_URL: "http://verus-testnet:17486" })),
+    ).toThrow(`VERUS_RPC_URL must be ${APPROVED_VERUS_RPC_URL}`);
+    expect(() => loadConfig(productionEnvironment({ VERUS_RPC_USER: "verusrpc" }))).toThrow(
+      "VERUS_RPC_USER and VERUS_RPC_PASSWORD must be unset",
+    );
+    expect(() => loadConfig(productionEnvironment({ VERUS_RPC_PASSWORD: "not-used" }))).toThrow(
+      "VERUS_RPC_USER and VERUS_RPC_PASSWORD must be unset",
+    );
   });
 });

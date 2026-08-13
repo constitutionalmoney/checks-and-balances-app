@@ -70,6 +70,7 @@ function createApp({ config, store, verus, now = () => Date.now() }) {
       verusd_rpc_client_commit: config.rpcClientCommit,
       verus_bitgo_commit: config.bitgoCommit,
       daemon_version: config.daemonVersion,
+      chain_read_url: config.rpcUrl,
       timestamp: new Date(now()).toISOString(),
     });
   });

@@ -11,14 +11,14 @@ import {
 const NOW = new Date("2027-01-15T08:00:00.000Z");
 const EXPIRES = new Date("2027-01-15T08:05:00.000Z");
 const CHALLENGE = "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq";
-const IDENTITY = "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm";
+const IDENTITY = "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP";
 const DEEP_LINK = "i5jtwbp6zymeay9llnraglgjqgdrffsau4://x-callback-url/synthetic-request";
 const STATE = "opaque-account-bound-state-with-sufficient-entropy";
 const AUDIENCE = "cbc-participant-app";
 const CONFIG: HostedAuthClientConfig = {
   baseUrl: "https://auth.checksandbalances.services",
   contractVersion: "cbc-verusid-auth.v1",
-  serviceVersion: "1.1.0",
+  serviceVersion: "1.1.1",
   serviceSourceRevision: "1".repeat(40),
   imageDigest: `sha256:${"2".repeat(64)}`,
   sdkCommit: "3".repeat(40),
@@ -41,7 +41,7 @@ describe("hosted VerusID auth client", () => {
       return json({
         status: "ok",
         service: "verusid-auth",
-        version: "1.1.0",
+        version: "1.1.1",
         chain: "vrsctest",
         signing_identity_configured: true,
         chain_configured: true,
@@ -66,6 +66,19 @@ describe("hosted VerusID auth client", () => {
       `Bearer ${CONFIG.clientSecret}`,
       `Bearer ${CONFIG.clientSecret}`,
     ]);
+  });
+
+  it("fails closed when hosted chain reads report a substituted endpoint", async () => {
+    let postCalled = false;
+    const client = new HostedVerusIdAuthHttpClient(CONFIG, (async (_url, init) => {
+      if (init?.method === "POST") postCalled = true;
+      return json({ ...validHealth(), chain_read_url: "http://verus-testnet:17486" });
+    }) as typeof fetch);
+
+    await expect(client.createChallenge(challengeInput())).rejects.toMatchObject({
+      code: "INCOMPATIBLE",
+    });
+    expect(postCalled).toBe(false);
   });
 
   it("verifies HS256, issuer, audience, challenge, state, times, and identity", async () => {
@@ -191,6 +204,7 @@ function validHealth(): Record<string, unknown> {
     verusd_rpc_client_commit: CONFIG.rpcClientCommit,
     verus_bitgo_commit: CONFIG.bitgoCommit,
     daemon_version: CONFIG.daemonVersion,
+    chain_read_url: "https://api.verustest.net",
     chain: "vrsctest",
     contract_version: CONFIG.contractVersion,
     signing_identity: IDENTITY,

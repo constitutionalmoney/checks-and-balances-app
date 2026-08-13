@@ -32,7 +32,7 @@ import {
 const NOW = new Date(1_800_000_000 * 1_000);
 const ACCOUNT = "auth_account_synthetic_participant_0001";
 const OTHER_ACCOUNT = "auth_account_synthetic_participant_0002";
-const APPLICATION_IDENTITY = "iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm";
+const APPLICATION_IDENTITY = "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP";
 const CALLBACK_URL = "https://auth.checksandbalances.services/verusidlogin";
 const CONFIG: WalletLinkServiceConfig = {
   enabled: true,

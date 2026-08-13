@@ -1,6 +1,6 @@
 {
   "name": "@cbc/verusid-auth-service",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "CBC-scoped VRSCTEST VerusID LoginConsent verifier",
   "main": "src/index.js",

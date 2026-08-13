@@ -27,10 +27,10 @@ x-runtime-environment: &runtime-environment
   CBC_PARTICIPANT_AUTH_SECRET: ${CBC_PARTICIPANT_AUTH_SECRET:?Set the participant auth secret in Dokploy}
   CBC_COMMITTEE_AUTH_SECRET: ${CBC_COMMITTEE_AUTH_SECRET:?Set the distinct committee auth secret in Dokploy}
   CBC_RATE_LIMIT_SECRET: ${CBC_RATE_LIMIT_SECRET:?Set the auth rate-limit secret in Dokploy}
-  CBC_VERUS_LINK_APPLICATION_IDENTITY: iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm
+  CBC_VERUS_LINK_APPLICATION_IDENTITY: iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP
   CBC_VERUS_AUTH_URL: https://auth.checksandbalances.services
   CBC_VERUS_AUTH_CALLBACK_URL: https://auth.checksandbalances.services/verusidlogin
-  CBC_VERUS_AUTH_SERVICE_VERSION: ${CBC_VERUS_AUTH_SERVICE_VERSION:-1.1.0}
+  CBC_VERUS_AUTH_SERVICE_VERSION: ${CBC_VERUS_AUTH_SERVICE_VERSION:-1.1.1}
   CBC_VERUS_AUTH_ISSUER: checks-and-balances-verusid-auth
   CBC_VERUS_AUTH_CONTRACT_VERSION: cbc-verusid-auth.v1
   CBC_VERUS_AUTH_SOURCE_REVISION: ${CBC_VERUS_AUTH_SOURCE_REVISION:-}

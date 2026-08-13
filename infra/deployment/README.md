@@ -46,7 +46,8 @@ an ingress route.
 | `CBC_VERUS_RPC_PASSWORD` | VRSCTEST RPC password stored only in Dokploy.                                |
 
 The Compose definition also pins the hosted VerusID authentication origin, callback, contract,
-issuer, and `CONSTITUTION` signing identity. The following are conditionally required only after
+issuer, and dedicated `CHECKBALANCE.VRSCTEST@` signing identity. The following are conditionally
+required only after
 issue #19's hosted-service and mobile acceptance gates pass and
 `CBC_VERUS_LINKING_ENABLED` is deliberately changed to `true`:
 

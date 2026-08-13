@@ -12,13 +12,20 @@ Release status: disabled / not operational
 
 | Component                 | Observed target                                                              | Result                                                                           |
 | ------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Hosted auth service       | `https://auth.checksandbalances.services`, service version `1.1.0`, VRSCTEST | Source hardened in `services/verusid`; deployment and device acceptance pending  |
-| Request signer            | `CONSTITUTION`, `iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm`                         | Approved VRSCTEST signer; independent state readback still required per ceremony |
+| Hosted auth service       | `https://auth.checksandbalances.services`, service version `1.1.1`, VRSCTEST | CHECKBALANCE signer release; deployment and device acceptance pending            |
+| Request signer            | `CHECKBALANCE.VRSCTEST@`, `iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`               | Active dedicated VRSCTEST signer; service deployment readback still required     |
 | Android experimental APK  | Pixel 9 Audit; `com.verusmobile` `1.1.0-5`; Android 17/API 37; x86_64 16 KB  | Installed; experimental LoginConsent coverage only, not current-store acceptance |
 | Android Verus Mobile      | Current Google Play `org.autonomoussoftwarefoundation.verusmobile.android`   | Version `1.0.34` observed in store; install and device-path evidence pending     |
 | iOS Verus Mobile          | BrowserStack App Live real iPhone                                            | Exact App Store version/device pending observed evidence                         |
 | Hosted SDK/primitives     | Deployed source and dependency commits unknown                               | Pin and immutable image evidence required                                        |
+| Hosted read API           | `https://api.verustest.net`, unauthenticated read-only VRSCTEST              | Exact endpoint pinned; outage/substitution live evidence pending                 |
 | `verusd` / chain readback | `1.2.17-3`, VRSCTEST                                                         | Local typed read adapter available; mainnet blocked                              |
+
+The CHECKBALANCE registration was confirmed at VRSCTEST height `1182089`, transaction
+`2ed71bffde3c326a6cffda67e0cac3adcefd3b3c5a22a436466c036dc20277b0`. Its sole primary address is
+`RDExW3nvnGGrjKgSNXivaTby6bp5wDn2bc`, minimum signatures is `1`, and both recovery and revocation
+resolve to `cbc-app-auth-test.VRSCTEST@` (`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`). The recovery key
+must not be deployed with the hosted signer.
 
 The current AVD is named `Pixel 9 Audit`. ADB reports Android 17/API 37 on the
 `sdk_gphone16k_x86_64` image and `com.verusmobile` version `1.1.0-5` (version code `1010005`).

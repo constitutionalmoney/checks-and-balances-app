@@ -5,6 +5,7 @@ const MAX_DEEP_LINK_BYTES = 16 * 1024;
 const MAX_TOKEN_BYTES = 16 * 1024;
 const IADDRESS_PATTERN = /^i[1-9A-HJ-NP-Za-km-z]{24,34}$/;
 const LOGIN_CONSENT_SCHEME = "i5jtwbp6zymeay9llnraglgjqgdrffsau4:";
+const APPROVED_CHAIN_READ_URL = "https://api.verustest.net";
 
 export type HostedAuthErrorCode =
   "UNAVAILABLE" | "INCOMPATIBLE" | "INVALID_RESPONSE" | "INVALID_TOKEN";
@@ -236,6 +237,7 @@ export class HostedVerusIdAuthHttpClient implements HostedVerusIdAuthClient {
       health.verusd_rpc_client_commit !== this.config.rpcClientCommit ||
       health.verus_bitgo_commit !== this.config.bitgoCommit ||
       health.daemon_version !== this.config.daemonVersion ||
+      health.chain_read_url !== APPROVED_CHAIN_READ_URL ||
       health.chain !== "vrsctest" ||
       health.contract_version !== this.config.contractVersion ||
       health.signing_identity !== this.config.applicationIdentityAddress ||

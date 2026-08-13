@@ -26,10 +26,10 @@ Supply through the deployment secret/configuration store, never Compose source o
 ```text
 CBC_VERUS_NETWORK=VRSCTEST
 CBC_VERUS_LINKING_ENABLED=true
-CBC_VERUS_LINK_APPLICATION_IDENTITY=iMUw5xvWkC7qsCzgxi2um9YRCmugmBhBfm
+CBC_VERUS_LINK_APPLICATION_IDENTITY=iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP
 CBC_VERUS_AUTH_URL=https://auth.checksandbalances.services
 CBC_VERUS_AUTH_CALLBACK_URL=https://auth.checksandbalances.services/verusidlogin
-CBC_VERUS_AUTH_SERVICE_VERSION=1.1.0
+CBC_VERUS_AUTH_SERVICE_VERSION=1.1.1
 CBC_VERUS_AUTH_ISSUER=checks-and-balances-verusid-auth
 CBC_VERUS_AUTH_CONTRACT_VERSION=cbc-verusid-auth.v1
 CBC_VERUS_AUTH_SOURCE_REVISION=<exact 40-character deployed Git commit>
@@ -59,6 +59,18 @@ Before enabling:
 4. run service and CBC negative contract tests;
 5. run PostgreSQL migration/persistence checks; and
 6. pass the exact Android and iOS compatibility rows.
+
+The hosted auth service uses only pinned `https://api.verustest.net` read access and has no RPC
+username/password. Verify it fails closed if that endpoint is unavailable, substituted, malformed,
+or reports a wrong chain. CBC's `CBC_VERUS_RPC_*` values remain separate private-VPS credentials
+for independent identity readback and worker operations; never copy them into hosted auth.
+
+The approved signer readback is `CHECKBALANCE.VRSCTEST@`
+(`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`), status `active`, VRSCTEST system
+`iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq`, minimum signatures `1`, and primary address
+`RDExW3nvnGGrjKgSNXivaTby6bp5wDn2bc`. Recovery and revocation must remain
+`cbc-app-auth-test.VRSCTEST@` (`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`). Any difference is a
+fail-closed deployment blocker.
 
 ## Rotation
 

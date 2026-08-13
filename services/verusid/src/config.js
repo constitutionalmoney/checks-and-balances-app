@@ -3,6 +3,7 @@ const {
   APPROVED_CALLBACK_URL,
   APPROVED_SERVER_URL,
   APPROVED_SIGNING_IDENTITY,
+  APPROVED_VERUS_RPC_URL,
   CHAIN,
   CONTRACT_VERSION,
   JWT_ISSUER,
@@ -62,6 +63,17 @@ function loadConfig(environment = process.env) {
     throw new Error("CBC_CLIENT_SECRET, JWT_SECRET, and PRIVATE_KEY must be distinct");
   }
 
+  if (required(environment, "VERUS_RPC_URL") !== APPROVED_VERUS_RPC_URL) {
+    throw new Error(`VERUS_RPC_URL must be ${APPROVED_VERUS_RPC_URL}`);
+  }
+  if (
+    (typeof environment.VERUS_RPC_USER === "string" && environment.VERUS_RPC_USER.trim() !== "") ||
+    (typeof environment.VERUS_RPC_PASSWORD === "string" &&
+      environment.VERUS_RPC_PASSWORD.trim() !== "")
+  ) {
+    throw new Error("VERUS_RPC_USER and VERUS_RPC_PASSWORD must be unset for the public read API");
+  }
+
   const imageDigest = required(environment, "IMAGE_DIGEST").toLowerCase();
   if (!IMAGE_PATTERN.test(imageDigest)) {
     throw new Error("IMAGE_DIGEST must be an immutable sha256 image digest");
@@ -107,9 +119,7 @@ function loadConfig(environment = process.env) {
     clientSecret,
     allowedAudiences,
     redisUrl: validatedUrl(environment, "REDIS_URL", ["redis:", "rediss:"]),
-    rpcUrl: validatedUrl(environment, "VERUS_RPC_URL", ["http:", "https:"]),
-    rpcUser: environment.VERUS_RPC_USER || "",
-    rpcPassword: environment.VERUS_RPC_PASSWORD || "",
+    rpcUrl: APPROVED_VERUS_RPC_URL,
     serviceVersion: packageJson.version,
     serviceSourceRevision: commit(environment, "SERVICE_SOURCE_REVISION"),
     imageDigest,
