@@ -166,7 +166,8 @@ wallet callback endpoint. During authenticated CBC polling:
    and unique token ID;
 5. ensure the hosted signer/callback/network/presentation digest match the stored contract;
 6. ignore hosted role claims;
-7. resolve the selected identity by immutable i-address through private VRSCTEST RPC;
+7. resolve the selected identity by immutable i-address through CBC's private VRSCTEST RPC,
+   independently of the hosted service's pinned public read-only API;
 8. reject wrong-system, recovered, revoked, inactive, or mismatched state;
 9. atomically consume the local challenge and create/update the minimum link; and
 10. append an audit event without retaining the token or wallet response.

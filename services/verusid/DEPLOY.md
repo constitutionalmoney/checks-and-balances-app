@@ -13,12 +13,16 @@ port.
 - `VERUSID_AUTH_JWT_SECRET`: random value of at least 32 bytes, used only for result JWTs.
 - `VERUSID_AUTH_CLIENT_SECRET`: distinct random value of at least 32 bytes, also configured as
   `CBC_VERUS_AUTH_CLIENT_SECRET` on the CBC API.
-- `VERUSID_AUTH_RPC_URL`, `VERUSID_AUTH_RPC_USER`, and `VERUSID_AUTH_RPC_PASSWORD`: private,
-  read-only-capable VRSCTEST RPC access.
 - `SERVICE_SOURCE_REVISION`: full Git commit deployed by Dokploy.
 - `VERUSID_AUTH_IMAGE_DIGEST`: immutable digest from the successful main-branch
   `Publish immutable hosted-auth image` job.
 - `VERUSID_AUTH_VERUSD_VERSION`: exact daemon version serving the RPC endpoint.
+
+The hosted service pins `https://api.verustest.net` for unauthenticated, read-only VRSCTEST chain
+queries. Do not set `VERUSID_AUTH_RPC_URL`, `VERUSID_AUTH_RPC_USER`, or
+`VERUSID_AUTH_RPC_PASSWORD`; Compose does not consume them. The CHECKBALANCE WIF signs requests
+inside the service and is never sent to the public API. CBC's separate API/worker deployment uses
+its own private VPS `verusd` variables for independent readback and every write path.
 
 Before inserting the WIF, independently read `CHECKBALANCE.VRSCTEST@` from VRSCTEST and require
 identity address `iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`, status `active`, primary address
@@ -43,7 +47,7 @@ Do not deploy an image from a failed or incomplete publication job.
 1. Point `auth.checksandbalances.services` to the Dokploy ingress.
 2. Enable HTTPS and redirect HTTP to HTTPS.
 3. Route the hostname to `verusid-auth:3001` only.
-4. Preserve one trusted proxy hop; do not expose Redis or the private VRSCTEST RPC.
+4. Preserve one trusted proxy hop and do not expose Redis.
 5. Apply request-size and rate limits without changing the wallet callback body.
 
 ## Safe validation sequence
@@ -51,6 +55,8 @@ Do not deploy an image from a failed or incomplete publication job.
 1. Leave `CBC_VERUS_LINKING_ENABLED=false` in the CBC application.
 2. Confirm Compose resolves with all required values.
 3. Confirm `/health` returns HTTP 200 and every pinned field matches the approved deployment.
+   Treat public VRSCTEST API outage, wrong-chain data, malformed responses, or endpoint
+   substitution as fail-closed conditions.
 4. Run an authenticated synthetic challenge/result/ack contract check from the CBC network.
 5. Confirm an unauthenticated result request returns 401 and query-string credentials are ignored.
 6. Confirm service restart preserves a pending challenge/result through Redis.

@@ -60,6 +60,11 @@ Before enabling:
 5. run PostgreSQL migration/persistence checks; and
 6. pass the exact Android and iOS compatibility rows.
 
+The hosted auth service uses only pinned `https://api.verustest.net` read access and has no RPC
+username/password. Verify it fails closed if that endpoint is unavailable, substituted, malformed,
+or reports a wrong chain. CBC's `CBC_VERUS_RPC_*` values remain separate private-VPS credentials
+for independent identity readback and worker operations; never copy them into hosted auth.
+
 The approved signer readback is `CHECKBALANCE.VRSCTEST@`
 (`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`), status `active`, VRSCTEST system
 `iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq`, minimum signatures `1`, and primary address

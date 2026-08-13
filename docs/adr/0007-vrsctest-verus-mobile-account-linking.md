@@ -37,6 +37,12 @@ service secret manager. Recovery and revocation are delegated to the separately 
 `cbc-app-auth-test.VRSCTEST@` identity (`iEJB55oTeiszJbhaiuCbnjG9YKrz1CWNHY`), whose key is not
 deployed with the hosted service.
 
+The hosted service pins `https://api.verustest.net` without RPC credentials for the read-only
+VRSCTEST queries required by the LoginConsent SDK and verification adapter. The signer WIF stays
+local to the hosted process. This public read dependency does not replace CBC's private VPS
+`verusd`: CBC independently reads current identity state there, and every worker/write path stays
+on that private authenticated boundary.
+
 For each five-minute ceremony CBC:
 
 1. authenticates the existing passkey/email session and records separate optional-link consent;

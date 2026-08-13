@@ -6,6 +6,7 @@ const NETWORK = "VRSCTEST";
 const CHAIN = "vrsctest";
 const VRSCTEST_CHAIN_ID = "iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq";
 const APPROVED_SIGNING_IDENTITY = "iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP";
+const APPROVED_VERUS_RPC_URL = "https://api.verustest.net";
 const APPROVED_SERVER_URL = "https://auth.checksandbalances.services";
 const APPROVED_CALLBACK_URL = `${APPROVED_SERVER_URL}/verusidlogin`;
 const JWT_ISSUER = "checks-and-balances-verusid-auth";
@@ -29,6 +30,7 @@ module.exports = {
   APPROVED_CALLBACK_URL,
   APPROVED_SERVER_URL,
   APPROVED_SIGNING_IDENTITY,
+  APPROVED_VERUS_RPC_URL,
   CHAIN,
   CONTRACT_VERSION,
   IADDRESS_PATTERN,

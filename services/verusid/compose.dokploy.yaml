@@ -25,9 +25,7 @@ services:
       CBC_CLIENT_SECRET: ${VERUSID_AUTH_CLIENT_SECRET:?Set a distinct 32-byte service client secret}
       CBC_ALLOWED_AUDIENCES: cbc-participant-app,cbc-committee-console
       REDIS_URL: redis://redis:6379/0
-      VERUS_RPC_URL: ${VERUSID_AUTH_RPC_URL:?Set the private VRSCTEST RPC URL}
-      VERUS_RPC_USER: ${VERUSID_AUTH_RPC_USER:-}
-      VERUS_RPC_PASSWORD: ${VERUSID_AUTH_RPC_PASSWORD:-}
+      VERUS_RPC_URL: https://api.verustest.net
       SERVICE_SOURCE_REVISION: ${SERVICE_SOURCE_REVISION:?Set the exact deployed Git commit}
       IMAGE_DIGEST: ${VERUSID_AUTH_IMAGE_DIGEST:?Set the immutable deployed image digest}
       VERUSID_TS_CLIENT_COMMIT: 48a1d48a5d076f313022a5891986339851ad7c0c

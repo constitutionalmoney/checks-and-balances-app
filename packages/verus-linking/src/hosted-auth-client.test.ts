@@ -68,6 +68,19 @@ describe("hosted VerusID auth client", () => {
     ]);
   });
 
+  it("fails closed when hosted chain reads report a substituted endpoint", async () => {
+    let postCalled = false;
+    const client = new HostedVerusIdAuthHttpClient(CONFIG, (async (_url, init) => {
+      if (init?.method === "POST") postCalled = true;
+      return json({ ...validHealth(), chain_read_url: "http://verus-testnet:17486" });
+    }) as typeof fetch);
+
+    await expect(client.createChallenge(challengeInput())).rejects.toMatchObject({
+      code: "INCOMPATIBLE",
+    });
+    expect(postCalled).toBe(false);
+  });
+
   it("verifies HS256, issuer, audience, challenge, state, times, and identity", async () => {
     const client = new HostedVerusIdAuthHttpClient(CONFIG, hardenedFetch([]));
     const result = await client.getResult(resultInput());
@@ -191,6 +204,7 @@ function validHealth(): Record<string, unknown> {
     verusd_rpc_client_commit: CONFIG.rpcClientCommit,
     verus_bitgo_commit: CONFIG.bitgoCommit,
     daemon_version: CONFIG.daemonVersion,
+    chain_read_url: "https://api.verustest.net",
     chain: "vrsctest",
     contract_version: CONFIG.contractVersion,
     signing_identity: IDENTITY,

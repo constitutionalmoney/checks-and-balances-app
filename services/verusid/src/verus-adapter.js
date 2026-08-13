@@ -9,12 +9,7 @@ class ProductionVerusAdapter {
   constructor(config, sdk = require("verusid-ts-client")) {
     this.config = config;
     this.primitives = sdk.primitives;
-    const sdkRpcUrl = new URL(config.rpcUrl);
-    if (config.rpcUser) {
-      sdkRpcUrl.username = config.rpcUser;
-      sdkRpcUrl.password = config.rpcPassword;
-    }
-    this.client = new sdk.VerusIdInterface("VRSCTEST", sdkRpcUrl.toString());
+    this.client = new sdk.VerusIdInterface("VRSCTEST", config.rpcUrl);
     if (!this.primitives || !this.primitives.LoginConsentChallenge) {
       throw new Error("Pinned verusid-ts-client did not expose the required primitives");
     }

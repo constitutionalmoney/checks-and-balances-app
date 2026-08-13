@@ -12,9 +12,6 @@ async function rpc(config, method, params) {
   const url = new URL(config.rpcUrl);
   const transport = url.protocol === "https:" ? https : http;
   const body = JSON.stringify({ jsonrpc: "2.0", id: "cbc-auth", method, params });
-  const username = config.rpcUser || decodeURIComponent(url.username || "");
-  const password = config.rpcPassword || decodeURIComponent(url.password || "");
-
   return new Promise((resolve, reject) => {
     const request = transport.request(
       {
@@ -23,7 +20,6 @@ async function rpc(config, method, params) {
         port: url.port || undefined,
         path: `${url.pathname || "/"}${url.search}`,
         method: "POST",
-        auth: username ? `${username}:${password}` : undefined,
         headers: {
           accept: "application/json",
           "content-type": "application/json",

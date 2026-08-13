@@ -8,6 +8,12 @@ The only approved request signer is `CHECKBALANCE.VRSCTEST@`
 (`iBN1aqx6nYhm71h9UkGsW9mhU6trADx4WP`). Runtime configuration rejects any other signer. Its WIF is
 supplied only through the hosted service secret manager and never enters CBC application data.
 
+The service pins `https://api.verustest.net` for unauthenticated, read-only VRSCTEST identity and
+verification queries. It rejects alternate RPC endpoints and any RPC username/password. Request
+signing remains local to this process; the WIF is never transmitted to the public API. CBC's
+independent current-state readback and all chain writes remain behind its separate private VPS
+`verusd` boundary.
+
 The service proves control of a selected VerusID for optional CBC account linking. It does not
 authenticate a CBC account, assign a role, establish identity or residency, issue an attestation,
 write to Verus, accept evidence, or support mainnet.

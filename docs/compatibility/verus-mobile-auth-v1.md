@@ -18,6 +18,7 @@ Release status: disabled / not operational
 | Android Verus Mobile      | Current Google Play `org.autonomoussoftwarefoundation.verusmobile.android`   | Version `1.0.34` observed in store; install and device-path evidence pending     |
 | iOS Verus Mobile          | BrowserStack App Live real iPhone                                            | Exact App Store version/device pending observed evidence                         |
 | Hosted SDK/primitives     | Deployed source and dependency commits unknown                               | Pin and immutable image evidence required                                        |
+| Hosted read API           | `https://api.verustest.net`, unauthenticated read-only VRSCTEST              | Exact endpoint pinned; outage/substitution live evidence pending                 |
 | `verusd` / chain readback | `1.2.17-3`, VRSCTEST                                                         | Local typed read adapter available; mainnet blocked                              |
 
 The CHECKBALANCE registration was confirmed at VRSCTEST height `1182089`, transaction
