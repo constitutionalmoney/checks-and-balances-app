@@ -5,7 +5,7 @@ participant collection, document upload, wallet flow, Verus write, or mainnet su
 
 ## Prerequisites
 
-- Node.js `24.19.0` (the `.node-version` pin)
+- Node.js `24.22.1` (the `.node-version` pin)
 - pnpm `11.20.0` (the `packageManager` pin)
 - Docker Desktop with Compose for the full local stack
 

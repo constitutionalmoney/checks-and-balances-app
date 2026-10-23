@@ -7,7 +7,7 @@
   "type": "module",
   "packageManager": "pnpm@11.20.0",
   "engines": {
-    "node": ">=24.0.0 <25",
+    "node": ">=24.22.1 <25",
     "pnpm": "11.20.0"
   },
   "scripts": {
@@ -47,10 +47,10 @@
     "eslint": "10.8.0",
     "globals": "17.9.0",
     "prettier": "3.9.6",
-    "tsx": "4.23.9",
+    "tsx": "4.23.15",
     "turbo": "2.10.8",
     "typescript": "6.0.3",
     "typescript-eslint": "8.66.0",
-    "vitest": "4.1.10"
+    "vitest": "4.1.12"
   }
 }
