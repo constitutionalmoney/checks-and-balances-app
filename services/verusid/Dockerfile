@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:24.19.0-bookworm-slim AS dependencies
+FROM node:24.22.1-bookworm-slim AS dependencies
 
 ARG VERUSID_TS_CLIENT_COMMIT=48a1d48a5d076f313022a5891986339851ad7c0c
 ARG VERUS_PRIMITIVES_COMMIT=30c951804228a285546a45457be57ead39d90888
@@ -29,18 +29,18 @@ RUN git clone https://github.com/VerusCoin/BitGoJS.git /tmp/bitgojs \
 RUN node - <<'NODE'
 const fs = require('node:fs');
 const securityOverrides = {
-  axios: '1.19.0',
+  axios: '1.20.0',
   'base-x': '3.0.11',
-  'brace-expansion': '1.1.18',
-  'cipher-base': '1.0.5',
+  'brace-expansion': '1.1.21',
+  'cipher-base': '1.0.7',
   elliptic: '6.6.1',
   'form-data': '4.0.6',
-  'ip-address': '10.3.1',
+  'ip-address': '10.7.4',
   secp256k1: '3.8.1',
   'sha.js': '2.4.12',
-  tar: '7.5.19',
+  tar: '7.5.22',
   'tiny-secp256k1': '1.1.7',
-  undici: '6.27.0',
+  undici: '6.29.1',
 };
 function applySecurityOverrides(pkg) {
   if (pkg.dependencies?.axios) pkg.dependencies.axios = securityOverrides.axios;
@@ -106,7 +106,7 @@ RUN mkdir -p /app/node_modules/@bitgo \
 
 RUN node -e "const sdk=require('verusid-ts-client'); if(typeof sdk.VerusIdInterface!=='function') process.exit(1)"
 
-FROM node:24.19.0-bookworm-slim AS runtime
+FROM node:24.22.1-bookworm-slim AS runtime
 ARG SERVICE_SOURCE_REVISION
 ARG VERUSID_TS_CLIENT_COMMIT=48a1d48a5d076f313022a5891986339851ad7c0c
 ARG VERUS_PRIMITIVES_COMMIT=30c951804228a285546a45457be57ead39d90888

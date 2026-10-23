@@ -123,7 +123,7 @@ When `LOCAL_OPERATOR.md` exists, read it before local Android, wallet, Verus, or
 
 ## Local capabilities and test classes
 
-- The root workspace requires Node.js `24.19.0` and pnpm `11.20.0`.
+- The root workspace requires Node.js `24.22.1` and pnpm `11.20.0`.
 - Docker Desktop with Compose is required for the full local stack.
 - `services/verusid` is a separate npm project with its own `package-lock.json`; it is outside the
   pnpm workspace.

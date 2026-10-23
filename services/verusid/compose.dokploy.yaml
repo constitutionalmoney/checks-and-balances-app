@@ -52,7 +52,7 @@ services:
     networks: [private, web]
 
   redis:
-    image: redis:8.2.3-bookworm
+    image: redis:8.2.9-bookworm
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
     volumes:

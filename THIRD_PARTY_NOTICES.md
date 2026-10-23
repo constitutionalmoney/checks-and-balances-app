@@ -10,15 +10,15 @@ components selected for the non-operational foundation and subsequent completed 
 
 | Component                           |                    Version | Purpose                                              | Licence                             | Distribution/use note                               |
 | ----------------------------------- | -------------------------: | ---------------------------------------------------- | ----------------------------------- | --------------------------------------------------- |
-| Node.js                             |                    24.19.0 | LTS runtime and container base                       | MIT                                 | Runtime/container base                              |
+| Node.js                             |                    24.22.1 | LTS runtime and container base                       | MIT                                 | Runtime/container base                              |
 | pnpm                                |                    11.20.0 | Workspace package manager                            | MIT                                 | Development and CI                                  |
 | Turborepo                           |                     2.10.8 | Workspace task graph                                 | MIT                                 | Development and CI                                  |
 | TypeScript                          |                      6.0.3 | Strict type system/compiler                          | Apache-2.0                          | Build tooling                                       |
-| Next.js                             |                     16.3.0 | Participant, committee, verifier, and docs shells    | MIT                                 | Bundled application runtime                         |
+| Next.js                             |                     16.4.2 | Participant, committee, verifier, and docs shells    | MIT                                 | Bundled application runtime                         |
 | React / React DOM                   |                     19.2.8 | Next.js shell rendering                              | MIT                                 | Bundled application runtime                         |
-| NestJS packages                     |                    11.1.28 | API shell                                            | MIT                                 | Bundled application runtime                         |
-| NestJS Swagger                      |                     11.4.6 | Health/status OpenAPI generation                     | MIT                                 | Bundled application runtime                         |
-| Fastify                             |                     5.10.0 | NestJS-compatible API/worker HTTP runtime            | MIT                                 | Bundled application runtime                         |
+| NestJS packages                     |                     11.2.7 | API shell                                            | MIT                                 | Bundled application runtime                         |
+| NestJS Swagger                      |                     11.4.7 | Health/status OpenAPI generation                     | MIT                                 | Bundled application runtime                         |
+| Fastify                             |                     5.12.7 | NestJS-compatible API/worker HTTP runtime            | MIT                                 | Bundled application runtime                         |
 | `@fastify/cors` / `@fastify/helmet` |            11.3.0 / 13.1.0 | CORS and security headers                            | MIT                                 | Bundled application runtime                         |
 | Prisma packages                     |                      7.9.1 | Model-free PostgreSQL schema/migration foundation    | Apache-2.0                          | Build/runtime dependency                            |
 | `pg` / `@types/pg`                  |            8.22.0 / 8.20.4 | PostgreSQL readiness                                 | MIT                                 | Runtime/build types                                 |
@@ -33,19 +33,19 @@ components selected for the non-operational foundation and subsequent completed 
 | typescript-eslint                   |                     8.66.0 | TypeScript ESLint support                            | MIT                                 | CI/build tooling                                    |
 | globals                             |                     17.9.0 | ESLint runtime globals                               | MIT                                 | CI/build tooling                                    |
 | Prettier                            |                      3.9.6 | Formatting checks                                    | MIT                                 | CI/build tooling                                    |
-| Vitest                              |                     4.1.10 | Unit, integration, and HTTP shell tests              | MIT                                 | CI/build tooling                                    |
+| Vitest                              |                     4.1.12 | Unit, integration, and HTTP shell tests              | MIT                                 | CI/build tooling                                    |
 | `@simplewebauthn/server`            |                     13.3.2 | WebAuthn option generation and response verification | MIT                                 | Bundled authentication runtime                      |
-| tsx                                 |                     4.23.9 | TypeScript development/scripts                       | MIT                                 | Development and CI                                  |
+| tsx                                 |                    4.23.15 | TypeScript development/scripts                       | MIT                                 | Development and CI                                  |
 | DefinitelyTyped React/Node types    | 19.2.18 / 19.2.4 / 24.13.3 | Compile-time declarations                            | MIT                                 | Build tooling                                       |
-| PostgreSQL container                |              18.1-bookworm | Synthetic local database                             | PostgreSQL Licence                  | Local development service                           |
-| Redis container                     |             8.2.3-bookworm | Synthetic local queue/cache                          | RSALv2 OR SSPL-1.0 OR AGPL-3.0-only | Local service; deployment licensing requires review |
+| PostgreSQL container                |              18.6-bookworm | Synthetic local database                             | PostgreSQL Licence                  | Local development service                           |
+| Redis container                     |             8.2.9-bookworm | Synthetic local queue/cache                          | RSALv2 OR SSPL-1.0 OR AGPL-3.0-only | Local service; deployment licensing requires review |
 | Mailpit container                   |                     1.30.6 | Local mail capture                                   | MIT                                 | Local development service                           |
 | WireMock container                  |                     3.13.2 | Fake allowlisted Verus readiness RPC                 | Apache-2.0                          | Local/CI test service                               |
 | Express                             |                      5.2.1 | Hosted VerusID HTTP contract                         | MIT                                 | Bundled hosted-auth runtime                         |
 | express-rate-limit                  |                      8.6.2 | Hosted-auth abuse limits                             | MIT                                 | Bundled hosted-auth runtime                         |
 | dotenv                              |                     17.4.2 | Hosted-auth local configuration                      | BSD-2-Clause                        | Bundled hosted-auth runtime                         |
 | jsonwebtoken                        |                      9.0.3 | Bound short-lived hosted result JWTs                 | MIT                                 | Bundled hosted-auth runtime                         |
-| Jest / Supertest                    |             30.4.2 / 7.2.2 | Hosted-auth contract tests                           | MIT                                 | Development and CI                                  |
+| Jest / Supertest                    |             30.5.2 / 7.2.2 | Hosted-auth contract tests                           | MIT                                 | Development and CI                                  |
 
 GitHub Actions are pinned by full commit SHA in `.github/workflows/ci.yml`. Checkout, Node setup,
 pnpm setup, dependency review, Gitleaks, Docker Buildx/build-push, and Trivy retain their upstream

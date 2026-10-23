@@ -184,7 +184,7 @@ this makes a public workflow operational.
 
 ## Development
 
-The workspace pins Node.js `24.19.0` and pnpm `11.20.0`. See
+The workspace pins Node.js `24.22.1` and pnpm `11.20.0`. See
 [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) for the clean-clone workflow, every root quality
 command, environment profiles, local URLs, and Docker Compose instructions.
 
